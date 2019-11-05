@@ -1,0 +1,107 @@
+//Report de cada dataser e the correct luminosity recorded  in the end
+
+
+Bparking 1
+
+iniAOD-1/BAnalyzer/python/crab_projects/crab_Bparking1_Run2018A/results
+Summary from jobs in status 'finished':
+  Number of files processed: 295
+  Number of events read: 33770920
+  Number of events written in EDM files: 0
+  Number of events written in TFileService files: 0
+  Number of events written in other type of files: 0
+  Processed lumis written to processedLumis.json
+Additional report lumi files:
+  Input dataset lumis (from DBS, at task submission time) written to inputDatasetLumis.json
+  Lumis to process written to lumisToProcess.json
+Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/BAnalyzer/python/crab_projects/crab_Bparking1_Run2018A/crab.log
+
+Bparking 2
+
+Summary from jobs in status 'finished':
+  Number of files processed: 300
+  Number of events read: 33769980
+  Number of events written in EDM files: 0
+  Number of events written in TFileService files: 0
+  Number of events written in other type of files: 0
+  Processed lumis written to processedLumis.json
+Additional report lumi files:
+  Input dataset lumis (from DBS, at task submission time) written to inputDatasetLumis.json
+  Lumis to process written to lumisToProcess.json
+Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/BAnalyzer/python/crab_projects/crab_Bparking2_Run2018A/crab.log
+
+Bparking 3
+
+Summary from jobs in status 'finished':
+  Number of files processed: 313
+  Number of events read: 33759818
+  Number of events written in EDM files: 0
+  Number of events written in TFileService files: 0
+  Number of events written in other type of files: 0
+  Processed lumis written to processedLumis.json
+Additional report lumi files:
+  Input dataset lumis (from DBS, at task submission time) written to inputDatasetLumis.json
+  Lumis to process written to lumisToProcess.json
+Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/BAnalyzer/python/crab_projects/crab_Bparking3_Run2018A/crab.log
+
+Bparking 4
+
+Summary from jobs in status 'finished':
+  Number of files processed: 313
+  Number of events read: 33772597
+  Number of events written in EDM files: 0
+  Number of events written in TFileService files: 0
+  Number of events written in other type of files: 0
+  Processed lumis written to processedLumis.json
+Additional report lumi files:
+  Input dataset lumis (from DBS, at task submission time) written to inputDatasetLumis.json
+  Lumis to process written to lumisToProcess.json
+Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/BAnalyzer/python/crab_projects/crab_Bparking4_Run2018A/crab.log
+
+Bparking 5
+
+Summary from jobs in status 'finished':
+  Number of files processed: 281
+  Number of events read: 33764476
+  Number of events written in EDM files: 0
+  Number of events written in TFileService files: 0
+  Number of events written in other type of files: 0
+  Processed lumis written to processedLumis.json
+Additional report lumi files:
+  Input dataset lumis (from DBS, at task submission time) written to inputDatasetLumis.json
+  Lumis to process written to lumisToProcess.json
+Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/BAnalyzer/python/crab_projects/crab_Bparking5_Run2018A/crab.log
+
+Bparking 6
+
+Summary from jobs in status 'finished':
+  Number of files processed: 264
+  Number of events read: 33766131
+  Number of events written in EDM files: 0
+  Number of events written in TFileService files: 0
+  Number of events written in other type of files: 0
+  Processed lumis written to processedLumis.json
+Additional report lumi files:
+  Input dataset lumis (from DBS, at task submission time) written to inputDatasetLumis.json
+  Lumis to process written to lumisToProcess.json
+Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/BAnalyzer/python/crab_projects/crab_Bparking6_Run2018A/crab.log
+
+
+#Data tag : 19v3 , Norm tag: onlineresult
++-------------+-------------------+------+------+----------------+---------------+
+| run:fill    | time              | nls  | ncms | delivered(/fb) | recorded(/fb) |
++-------------+-------------------+------+------+----------------+---------------+
+| 316060:6662 | 05/10/18 04:17:57 | 717  | 717  | 0.139296214    | 0.135398420   |
+| 316114:6666 | 05/11/18 04:24:40 | 836  | 836  | 0.153964264    | 0.150233950   |
+| 316187:6674 | 05/12/18 06:41:22 | 1448 | 1448 | 0.318386450    | 0.304526997   |
++-------------+-------------------+------+------+----------------+---------------+
+#Summary: 
++-------+------+------+------+-------------------+------------------+
+| nfill | nrun | nls  | ncms | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+------+------+-------------------+------------------+
+| 3     | 3    | 3001 | 3001 | 0.611646928       | 0.590159367      |
++-------+------+------+------+-------------------+------------------+
+
+#Check JSON:
+#(run,ls) in json but not in results: []
+
