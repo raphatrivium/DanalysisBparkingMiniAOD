@@ -28,9 +28,8 @@ process.source = cms.Source("PoolSource",
 #'file:F800AD57-C458-E811-AC54-0025904C67B4_BParking2.root'
 #'file:E0B15542-285A-E811-A365-001E67E71D03_BParking3.root'
 #'file:FCC64175-325A-E811-A1EF-FA163E17FD8B_BParking4.root'
-#'file:FCB39B8B-FE58-E811-B8D3-FA163EF8FD87_BParking5.root'
+#'file:FA6C34C5-8E58-E811-8048-008CFAFBE5CE_Bparking5.root'
 #'file:FCEDA0BD-3F5B-E811-98D6-68B59972BF74_BParking6.root'
-
 	   )
 )
 #===================================================================
@@ -42,8 +41,9 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	bits = cms.InputTag("TriggerResults","","HLT"),
 	prescales = cms.InputTag("patTrigger"),#linked to pat::PackedTriggerPrescales
 	objects = cms.InputTag("selectedPatTrigger"),
-	#PathName = cms.untracked.string("HLT_Mu8_IP3_part0_v"), #ParkingBPH1
-	PathName = cms.untracked.string("HLT_Mu9_IP6_part"),  #ParkingBPH1
+	#PathName = cms.untracked.string("HLT_Mu8p5_IP3p5_part0"), #ParkingBPH1
+	#PathName = cms.untracked.string("HLT_Mu12_IP6_part0"),  #ParkingBPH1
+	PathName = cms.untracked.string("HLT_Mu9_IP6_part0"),  #ParkingBPH1
 	
 	tracks = cms.InputTag('packedPFCandidates'),#linked to vector<pat::PackedCandidate
 	recVtxs = cms.InputTag('offlineSlimmedPrimaryVertices'), #linked to vector<reco::Vertex> 

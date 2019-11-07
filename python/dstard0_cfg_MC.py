@@ -38,7 +38,7 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	prescales = cms.InputTag("patTrigger"),#linked to pat::PackedTriggerPrescales
 	objects = cms.InputTag("selectedPatTrigger"),
 	#PathName = cms.untracked.string("HLT_Mu8_IP3_part"), #ParkingBPH1
-	PathName = cms.untracked.string("HLT_Mu9_IP6_part"),  #ParkingBPH1
+	PathName = cms.untracked.string("HLT_Mu9_IP6_part2"),  #ParkingBPH1
 
 	tracks = cms.InputTag('packedPFCandidates'),#linked to vector<pat::PackedCandidate
 	recVtxs = cms.InputTag('offlineSlimmedPrimaryVertices'), #linked to vector<reco::Vertex> 

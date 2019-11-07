@@ -101,6 +101,7 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		explicit DstarD0TTree(const edm::ParameterSet&);
 		~DstarD0TTree();
 		void RecDstar(const edm::Event& iEvent, const edm::EventSetup&, const reco::Vertex& RecVtx);
+		void RecDstarWrongCombination(const edm::Event& iEvent, const edm::EventSetup&, const reco::Vertex& RecVtx);
 		void RecD0(const edm::Event& iEvent, const edm::EventSetup&, const reco::Vertex& RecVtx);
 		double FindAngle(const reco::Vertex& , const TransientVertex& , const math::XYZTLorentzVector& ) ;
 		//double FindAngleMCpromptD0(const GenParticle&);
@@ -121,11 +122,9 @@ class DstarD0TTree : public edm::EDAnalyzer {
 
 
 		// ----------member data ---------------------------
-
-
 		bool doMC, doRec,debug;
 		double pi_mass, k_mass;
-        std::string triggerName_;
+      std::string triggerName_;
 		std::vector<int> dScandsKpi;
 		std::vector<reco::TransientTrack>  goodTracks;
 		std::vector<reco::TransientTrack>  goodTracksD0;
@@ -133,7 +132,6 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		std::vector<reco::TransientTrack> t_tks;
 		std::vector<reco::TransientTrack> tksD0;
 		TTree *data;
-
 
 		//Triggers
 		edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
@@ -155,7 +153,6 @@ class DstarD0TTree : public edm::EDAnalyzer {
 
 		edm::InputTag particleFlowTag_;
 
-
 		double Ebeam_;
 		double comEnergy_;
 		int TTBit_8,TTBit_9,TTBit_10,TTBit_32,TTBit_33,TTBit_34; 
@@ -176,19 +173,25 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		//int D0AfterLorentzVectorKarman, PointingcosPhi, Significance, D0MinusPDG, D0pTThree, DsAfterLorentzVector, DsMinusD0, Observation;
 
 		//counters
-		unsigned long TotalTracks, TracksAfterTrigger, TracksHasTrackDetails, TracksChargeZero, TracksEta, TracksHighPurity, TracksPDG211;
+		unsigned long TotalTracks, TracksHasTrackDetails, TracksChargeZero, TracksEta, TracksHighPurity, TracksPDG211;
 		unsigned long TracksPtZeroFive, TracksChi3, TracksNumberOfHits2, TracksDxyThree, TracksDzThree, TrackSlowPionCandidates;
 		unsigned long TracksPtZeroSix, TracksChiTwoFive, TracksNumberOfHits5, TracksNumberOfPixelHits2, TracksDxyZeroOne, TracksDzOne; 
 		unsigned long TrackKaonPionCandidates, D0AfterLorentzVector, D0MinusPDGzero2, DsMinusD0Zerothree, TransientTrackOfpiK, SVConfidenceLevel;
 		unsigned long D0AfterLorentzVectorKarman, PointingcosPhi, Significance, D0MinusPDG, D0pTThree, DsAfterLorentzVector, DsMinusD0, Observation;
 		unsigned long D0Candidates, DsCandidates;
 
+		unsigned long TracksPt0p8, D0PromptTracksChi5, D0PromptTracksNumberHits5, D0PromptTracksPixelHits2;
+		unsigned long D0PromptTracksDxy0p1, D0PromptTracksDz0p5, TracksD0combination;
+		unsigned long D0PromptminusPDG1p0, D0PromptSVConfidenceLevel, D0PromptPointingCosPhi; 
+		unsigned long D0PromptSignificance, D0PromptCandidates, D0PromptTracksEta2p5;
+		unsigned long D0PromptKpiAfterTransientp0;
+
 		int counter,runNumber,eventNumber,lumi;
-		int countInTriggered;
+		unsigned long Triggered_Event;
 		int ND0KpiCand, NKpiCand,NdsKpiMC,FlagMC,FlagRec,n_pVertex,ntracksD0Kpi,ntracksDstar,HLTPath_,TTBit_;   
 
 		double PVx,PVy,PVz,PVerrx,PVerry,PVerrz,lumiWeight_;  
-		double HFEnergyMinus,HFEnergyPlus;
+		double HFEnergyMinus,HFEnergyPlus; 
 		TLorentzVector vD0_1, vD0_2, vD0kaon, vD0pion;
 		double mass1, mass2;
 		bool comb1, comb2, combOR;     
@@ -196,15 +199,27 @@ class DstarD0TTree : public edm::EDAnalyzer {
 
 		std::vector<std::string> NameTrigger;
 		//std::vector<TString> NameTrigger;
-		std::vector<double> D0Kpi_VtxProb,D0Kpipt,D0Kpieta,D0Kpiphi,D0Kpi_VtxPosx,D0Kpi_VtxPosy,D0Kpi_VtxPosz,D0Kpi_Vtxerrx,D0Kpi_Vtxerry,D0Kpi_Vtxerrz,D0Kpi_DispAngle;
+		std::vector<double> D0Kpi_VtxProb, D0Kpipt, D0Kpieta, D0Kpiphi, D0Kpi_VtxPosx, D0Kpi_VtxPosy, 
+		D0Kpi_VtxPosz, D0Kpi_Vtxerrx, D0Kpi_Vtxerry, D0Kpi_Vtxerrz, D0Kpi_DispAngle;
 		std::vector<double> D0Kpimass,TrkD0Keta,TrkD0pieta,TrkD0Kphi,TrkD0piphi;
-		std::vector<double> TrkD0Kdxy,TrkD0pidxy,TrkD0Kdz,TrkD0pidz,TrkD0Knhits,TrkD0pinhits,TrkD0Kchi2,TrkD0pichi2,D0DeltaR,TrkD0Kpt,TrkD0pipt,D0KpisXY_vec,D0Kpis3D_vec,D0_kT_vec;
+		std::vector<double> TrkD0Kdxy, TrkD0pidxy, TrkD0Kdz, TrkD0pidz, TrkD0Knhits, TrkD0pinhits, 
+		TrkD0Kchi2, TrkD0pichi2, D0DeltaR, TrkD0Kpt, TrkD0pipt, D0KpisXY_vec, D0Kpis3D_vec, D0_kT_vec;
 
-
-		std::vector<double> D0_VtxProb,D0pt,Dspt,D0eta,Dseta,D0phi,Dsphi,D0_VtxPosx,D0_VtxPosy,D0_VtxPosz,D0_Vtxerrx,D0_Vtxerry,D0_Vtxerrz,TrkKdxy;
-		std::vector<double> Dsmass,Trkpidxy,TrkSdxy,TrkKdz,Trkpidz,TrkSdz,TrkKnhits,Trkpinhits,TrkSnhits,TrkKchi2,Trkpichi2,TrkSchi2,DSDeltaR,TrkKpt,Trkpipt;
-		std::vector<double> D0mass,TrkKmass,Trkpimass,TrkSmass,TrkSpt,TrkKeta,Trkpieta,TrkSeta,TrkKphi,Trkpiphi,TrkSphi,TrkScharge,D0fromDSsXY_vec;
+		std::vector<double> D0_VtxProb, D0pt, Dspt, D0eta, Dseta, D0phi, Dsphi, D0_VtxPosx, D0_VtxPosy, D0_VtxPosz, 
+		D0_Vtxerrx, D0_Vtxerry, D0_Vtxerrz,TrkKdxy;
+		std::vector<double> Dsmass, Trkpidxy, TrkSdxy, TrkKdz, Trkpidz, TrkSdz, TrkKnhits, Trkpinhits, TrkSnhits, 
+		TrkKchi2, Trkpichi2, TrkSchi2, DSDeltaR, TrkKpt,Trkpipt;
+		std::vector<double> D0mass, TrkKmass, Trkpimass, TrkSmass, TrkSpt, TrkKeta, Trkpieta, TrkSeta, TrkKphi, 
+		Trkpiphi, TrkSphi, TrkScharge, D0fromDSsXY_vec;
 		std::vector<double> D0fromDSs3D_vec, Anglephi_vec;
+
+		std::vector<double> D0_VtxProbWrong, D0ptWrong, DsptWrong, D0etaWrong, DsetaWrong, D0phiWrong, DsphiWrong, D0_VtxPosxWrong, D0_VtxPosyWrong, D0_VtxPoszWrong, 
+		D0_VtxerrxWrong, D0_VtxerryWrong, D0_VtxerrzWrong, TrkKdxyWrong;
+		std::vector<double> DsmassWrong, TrkpidxyWrong, TrkSdxyWrong, TrkKdzWrong, TrkpidzWrong, TrkSdzWrong, TrkKnhitsWrong, TrkpinhitsWrong, TrkSnhitsWrong, 
+		TrkKchi2Wrong, Trkpichi2Wrong, TrkSchi2Wrong, DSDeltaRWrong, TrkKptWrong, TrkpiptWrong;
+		std::vector<double> D0massWrong, TrkKmassWrong, TrkpimassWrong, TrkSmassWrong, TrkSptWrong, TrkKetaWrong, TrkpietaWrong, TrkSetaWrong, TrkKphiWrong, 
+		TrkpiphiWrong, TrkSphiWrong, TrkSchargeWrong, D0fromDSsXY_vecWrong;
+		std::vector<double> D0fromDSs3D_vecWrong, Anglephi_vecWrong;
 
 		std::vector<double> MxFromPFCands_,EPlusPzFromPFCands_,EMinusPzFromPFCands_,sumEHFPlusFromPFCands_,sumEHFMinusFromPFCands_;
 		std::vector<double> xiPlusFromPFCands_,xiMinusFromPFCands_,etaMaxFromPFCands_,etaMinFromPFCands_;
@@ -213,10 +228,12 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		std::vector<double> MCDseta,MCDsphi,MCDspt,MCDsenergy,MCDsp,MCDset,MCDsrapidity,MCDsmass;
 		std::vector<double> MCD0eta,MCD0phi,MCD0pt,MCD0energy,MCD0p,MCD0et,MCD0rapidity,MCD0mass;
 
-		std::vector<double> MCpromptD0eta,MCpromptD0phi,MCpromptD0pt,MCpromptD0energy,MCpromptD0p,MCpromptD0et,MCpromptD0rapidity,MCpromptD0mass;
-		std::vector<double> MCpromptD0_Keta,MCpromptD0_Kphi,MCpromptD0_Kpt,MCpromptD0_Kenergy,MCpromptD0_Kp,MCpromptD0_Ket,MCpromptD0_Krapidity,MCpromptD0_Kmass;
-		std::vector<double> MCpromptD0_Pieta,MCpromptD0_Piphi,MCpromptD0_Pipt,MCpromptD0_Pienergy,MCpromptD0_Pip,MCpromptD0_Piet,MCpromptD0_Pirapidity,MCpromptD0_Pimass;
-
+		std::vector<double> MCpromptD0eta, MCpromptD0phi, MCpromptD0pt, MCpromptD0energy, 
+		MCpromptD0p, MCpromptD0et, MCpromptD0rapidity, MCpromptD0mass;
+		std::vector<double> MCpromptD0_Keta, MCpromptD0_Kphi, MCpromptD0_Kpt, MCpromptD0_Kenergy,
+		 MCpromptD0_Kp, MCpromptD0_Ket, MCpromptD0_Krapidity, MCpromptD0_Kmass;
+		std::vector<double> MCpromptD0_Pieta, MCpromptD0_Piphi, MCpromptD0_Pipt, MCpromptD0_Pienergy, 
+		MCpromptD0_Pip, MCpromptD0_Piet, MCpromptD0_Pirapidity, MCpromptD0_Pimass;
 		std::vector<double> MCpromptD0_DispAngle,MCpromptD0_Kt;
 
 		//      std::vector<double> xiGenPlus_,xiGenMinus_,MxGen_,MxGenRange_,sumEnergyHEPlusGen_,sumEnergyHEMinusGen_,sumEnergyHFPlusGen_;
