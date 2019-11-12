@@ -37,18 +37,21 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	bits = cms.InputTag("TriggerResults","","HLT"),
 	prescales = cms.InputTag("patTrigger"),#linked to pat::PackedTriggerPrescales
 	objects = cms.InputTag("selectedPatTrigger"),
-	#PathName = cms.untracked.string("HLT_Mu8_IP3_part"), #ParkingBPH1
-	PathName = cms.untracked.string("HLT_Mu9_IP6_part2"),  #ParkingBPH1
-
+	#PathName = cms.untracked.string("HLT_Mu8p5_IP3p5_part0"), #triggerName
+	#PathName = cms.untracked.string("HLT_Mu12_IP6_part0"),  #triggerName
+	PathName = cms.untracked.string("HLT_Mu9_IP6_part0"),  #triggerName
 	tracks = cms.InputTag('packedPFCandidates'),#linked to vector<pat::PackedCandidate
 	recVtxs = cms.InputTag('offlineSlimmedPrimaryVertices'), #linked to vector<reco::Vertex> 
 	gens = cms.InputTag("prunedGenParticles"), #linked to reco::GenParticleCollection
 	gensD0 = cms.InputTag("prunedGenParticles"), #linked to reco::GenParticleCollection
 	# Options
 	comEnergy = cms.double(13000.),
-	TTBIt = cms.int32(34),
+	#TTBIt = cms.int32(34),
 	debug = cms.untracked.bool(False),
-	SaveROOTTree = cms.untracked.bool(True)
+	DstarSignificance3D = cms.double(0.3),
+	D0Significance3D = cms.double(3.),
+	selectionCuts = cms.bool(True), #Apply Cuts Online
+	triggerOn = cms.bool(False) #Apply Trigger Selection
 )
 
 process.TFileService = cms.Service("TFileService",

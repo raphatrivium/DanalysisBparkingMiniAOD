@@ -114,6 +114,8 @@ DstarD0TTree::DstarD0TTree(const edm::ParameterSet& iConfig):
 	doMC(iConfig.getParameter<bool>("doMC")),
 	doRec(iConfig.getParameter<bool>("doRec")),
 	debug(iConfig.getUntrackedParameter<bool>("debug",false)),
+	selectionCuts(iConfig.getParameter<bool>("selectionCuts")),
+	triggerOn(iConfig.getParameter<bool>("triggerOn")),
 	triggerName_(iConfig.getUntrackedParameter<std::string>("PathName","HLT_Mu9_IP6_part0_v2")),        
  	//Triggers
 	triggerBits_(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))),
@@ -123,10 +125,12 @@ DstarD0TTree::DstarD0TTree(const edm::ParameterSet& iConfig):
 	vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("recVtxs"))),
 	genParticlesTokenDstar_(consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("gens"))),
 	genParticlesTokenD0_(consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("gensD0"))),
-	comEnergy_(iConfig.getParameter<double>("comEnergy"))
+	comEnergy_(iConfig.getParameter<double>("comEnergy")),
+	DstarSignificance3D_(iConfig.getParameter<double>("DstarSignificance3D")),
+	D0Significance3D_(iConfig.getParameter<double>("D0Significance3D"))
 {     
-	counter = 0;
-	Triggered_Event = 0;
+	Total_Events_test = 0;
+	Triggered_Event_test = 0;
 	Ebeam_ = comEnergy_/2.;
 	edm::Service<TFileService> fs;
 
@@ -158,19 +162,19 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	using namespace std;
 	using namespace reco;
 	pi_mass=0.13957018; k_mass=0.493677;
-    counter++; 
+	Total_Events_test++; 
 	//To clear and initialize variables
 	initialize();
 
 	//run, event, lumi section
 	runNumber= iEvent.id().run();
 	eventNumber= iEvent.id().event();
-	lumi= iEvent.luminosityBlock();
+	lumi = iEvent.luminosityBlock();
 	
 	Handle<double> lumiWeight;
 	iEvent.getByLabel("lumiWeight",lumiWeight);
 
-	lumiWeight_=lumi;
+	lumiWeight_= lumi;
 	
 	//Triggers
 	Handle<edm::TriggerResults> triggerBits;
@@ -190,7 +194,7 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 	//Only events in which the path actually fired had stored the filter results and products:    
    bool triggerFired = TriggerInfo(iEvent,triggerBits,triggerPrescales,triggerName_);
-   if(triggerFired) Triggered_Event++;
+   if(triggerFired) Triggered_Event_test++;
 
 	NameTrigger.push_back(triggerName_);
 	
@@ -201,13 +205,19 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	//miniAOD
 	edm::ESHandle<TransientTrackBuilder> theB; 
 	iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
-
-    //Only events in which the path actually fired had stored the filter results and products:	  
-    //bool triggerFired = TriggerInfo(iEvent,triggerBits,triggerPrescales,triggerName_);
-    //if(triggerFired) Triggered_Event++;
 	
-	if (triggerFired) 
+	bool canDo= false;
+	for( int triggerComb = 0; triggerComb<2; triggerComb++) //For trigger selection on and off
 	{
+	canDo = false;//initiate the bool each loop.	
+	//With trigger
+	if (triggerComb == 0 and triggerOn==true and triggerFired ){canDo = true;}
+	//Without Trigger
+	else if (triggerComb == 1 and triggerOn==false ) {canDo = true; cout << "--------------No Trigger Applied " << endl; }
+	//security
+	else{ canDo = false; }
+	if (canDo){
+			
 	//Loop in the trakcs of the PackedCandidate 
 	for(View<pat::PackedCandidate>::const_iterator iTrack1 = tracks->begin(); iTrack1 != tracks->end(); ++iTrack1 ) 
 	{   TotalTracks++;
@@ -239,10 +249,10 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 			reco::TransientTrack slowpionTT = theB->build(iTrack1->pseudoTrack());
 			TrackSlowPionCandidates++; 
 			slowPiTracks.push_back(slowpionTT);	//Fill Transient Vector
-		}
+		}//End Selection for slowpion from D*
 			
 		Observation++;
-		//Kaon and Pion Candidates
+		//Kaon and Pion Candidates for D*
 		if( iTrack1->pt()>0.5 /*&& (fabs(iTrack1->pdgId()) == 211)*/)
 		{
 			TracksPtZeroSix++;
@@ -264,7 +274,7 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 			if (debug)cout << " PionTT "  << PionTT.track().momentum() << endl;
 			TrackKaonPionCandidates++;
 			goodTracks.push_back(PionTT); //Fill Transient Vector
-		}
+		}//End Kaon and Pion Candidates for D8 
 
 		// SELECTING TRACKS FOR D0 Prompt   
 		if( iTrack1->pt()>0.8 /*&& (fabs(iTrack1->pdgId()) == 211)*/)
@@ -288,24 +298,15 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 			D0PromptTracksDz0p5++;
 			reco::TransientTrack  D0TT = theB->build(iTrack1->pseudoTrack());
 			goodTracksD0.push_back(D0TT);//Fill Transient Vector
-		}          
-		//if(fabs(iTrack1->eta())<2.5 && iTrack1->pseudoTrack().normalizedChi2() < 5.0 && iTrack1->pseudoTrack().hitPattern().numberOfValidHits() >= 5 && iTrack1->pseudoTrack().hitPattern().numberOfValidPixelHits() >= 2 && iTrack1->pt() > 0.5 && iTrack1->p() >1.0 && fabs(iTrack1->dz())<0.5 && fabs(iTrack1->dxy())<0.1)
-		//{
-		//	reco::TransientTrack  D0TT = theB->build(iTrack1->pseudoTrack());
-		//	goodTracksD0.push_back(D0TT);
-		//}
-			
+		}//End SELECTING TRACKS FOR D0 Prompt            
+				
    	}//loop packed candidates
-	}//trigger
-//}//trigger
+	
 
 	if (debug) cout << " goodTracks size " << goodTracks.size() << endl;
     ntracksDstar = slowPiTracks.size();
     ntracksD0Kpi = goodTracksD0.size();
-
 	
-   if(triggerFired)
-   {
 		//Vertex Informations
 		size_t vtx_trk_size = (*recVtxs)[0].tracksSize();
 	  	int VtxIn=0;
@@ -336,11 +337,11 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 		//FindAngle(RecVtx,v_D0,d0kpi_p4); //Calculates the opening angle
       //FindAngleMCpromptD0(p);
-		//data->Fill();
 
-		data->Fill();		
-    }
-}
+		data->Fill();
+		}//End canDo	
+    }//end trigger flag
+}//End analyze
 
 //*********************************************************************************
 bool DstarD0TTree::TriggerInfo(const edm::Event& iEvent, edm::Handle<edm::TriggerResults> itriggerBits, edm::Handle<pat::PackedTriggerPrescales> itriggerPrescales, TString trigname){
@@ -404,30 +405,15 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 
 				if(trkS == trk1 || trkS == trk2) continue;
 				
-				TransientTrack K;
-				TransientTrack pi;
+				TransientTrack K;	TransientTrack pi;
                                 
 				//Right Combination Charges
-				if(trk1.charge() == trkS.charge())
-				{ //  cout << "Right Combination Charges" << endl;
-					pi = trk1; K = trk2;
-				}
-				else
-				{
-					K = trk1; pi = trk2;
-				}
+				if(trk1.charge() == trkS.charge()){pi = trk1; K = trk2;}
+				else{	K = trk1; pi = trk2;}
 
 				//Wrong Combination Charges - background
-				/*if(trk1.charge() == trkS.charge())
-				{ //  cout << "Right Combination Charges" << endl;
-					pi = trk2;
-					K = trk1;
-				}
-				else
-				{
-					K = trk2;
-					pi = trk1;
-				}	*/
+				/*if(trk1.charge() == trkS.charge()){pi = trk2;	K = trk1;}
+				else{K = trk2;pi = trk1;}	*/
                                
 				//D0 4-momentum Reconstruction (kaon and pion)
 				math::XYZTLorentzVector ip4_K(K.track().px(),
@@ -472,7 +458,7 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 				TransientTrackOfpiK++;
 				
 				//SV Confidence Level
-				if(vtxProb < 0.01) continue;
+				if(selectionCuts) {if(vtxProb < 0.01) continue;}
 				SVConfidenceLevel++;
 				
 				//D* 4-momentum Reconstruction after KalmanVertexFitter
@@ -491,7 +477,7 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 				//Angle between formation and decay of D0
   				double anglephi = FindAngle(RecVtx,v,d0_p4);
 				double cosPhi = cos(anglephi);
-				if( cosPhi < 0.99 ) continue;
+				if(selectionCuts) {if( cosPhi < 0.99 ) continue;}
 				//cout << "cos(anglephi)	: " << cos(anglephi) << endl;
 				PointingcosPhi++;
 
@@ -508,8 +494,7 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 				double D0fromDSs3D = D0fromDSd3D / D0fromDSe3D;
 
 				//cout << "significance 3D: "<< D0fromDSs3D << endl;
-				if( D0fromDSs3D < 3. ) continue;
-				//if( D0fromDSs3D < .3 ) continue;
+				if(selectionCuts) {if ( D0fromDSs3D < DstarSignificance3D_ ) continue;}
 				Significance++;
 
 				//Difference between D0 and D0PDG 5sigmas
@@ -517,7 +502,7 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 				D0MinusPDG++;
 
 				//Pt Cut of mesnons D0
-				if( d0_p4.Pt() < 3. ) continue;
+				if(selectionCuts) {if ( d0_p4.Pt() < 3. ) continue;}
 				D0pTThree++;
 								
 				D0Candidates++;
@@ -527,7 +512,7 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 				DsAfterLorentzVector++;
 								                      											
 				//Difference between D* and D0 -> Must be close to pion
-				if( (dsmass - d0mass) > 0.16) continue;
+				if(selectionCuts) {if( (dsmass - d0mass) > 0.16) continue;}
 				DsMinusD0++;
 				DsCandidates++; //Number of D* candidates
 
@@ -613,6 +598,7 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 	}
 }//End RecDstar
 
+//***********************************************************************************
 void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Vertex& RecVtx){
 
 	using namespace std;
@@ -636,23 +622,13 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 			{
 				TransientTrack trkS = slowPiTracks[k];
 				//cout << "Slow Pions Tracks(px,py,pz): "  << trkS.track().momentum() << endl;                
-
 				if(trkS == trk1 || trkS == trk2) continue;
 				
-				TransientTrack K;
-				TransientTrack pi;
+				TransientTrack K;	TransientTrack pi;
                                 
 				//Wrong Combination Charges - background
-				if(trk1.charge() == trkS.charge())
-				{ //  cout << "Right Combination Charges" << endl;
-					pi = trk2;
-					K = trk1;
-				}
-				else
-				{
-					K = trk2;
-					pi = trk1;
-				}
+				if(trk1.charge() == trkS.charge())	{ pi = trk2; K = trk1;}
+				else{K = trk2;	pi = trk1;}
                                
 				//D0 4-momentum Reconstruction (kaon and pion)
 				math::XYZTLorentzVector ip4_K(K.track().px(),
@@ -697,7 +673,7 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 				//TransientTrackOfpiK++;
 				
 				//SV Confidence Level
-				if(vtxProb < 0.01) continue;
+				if(selectionCuts) {if(vtxProb < 0.01) continue;}
 				//SVConfidenceLevel++;
 				
 				//D* 4-momentum Reconstruction after KalmanVertexFitter
@@ -716,7 +692,7 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 				//Angle between formation and decay of D0
   				double anglephi = FindAngle(RecVtx,v,d0_p4);
 				double cosPhi = cos(anglephi);
-				if( cosPhi < 0.99 ) continue;
+				if(selectionCuts) {if( cosPhi < 0.99 ) continue;}
 				//cout << "cos(anglephi)	: " << cos(anglephi) << endl;
 				//PointingcosPhi++;
 
@@ -733,8 +709,7 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 				double D0fromDSs3D = D0fromDSd3D / D0fromDSe3D;
 
 				//cout << "significance 3D: "<< D0fromDSs3D << endl;
-				if( D0fromDSs3D < 3. ) continue;
-				//if( D0fromDSs3D < .3 ) continue;
+				if(selectionCuts) {if( D0fromDSs3D < DstarSignificance3D_ ) continue;}
 				//Significance++;
 
 				//Difference between D0 and D0PDG 5sigmas
@@ -742,7 +717,7 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 				//D0MinusPDG++;
 
 				//Pt Cut of mesnons D0
-				if( d0_p4.Pt() < 3. ) continue;
+				if(selectionCuts) {if( d0_p4.Pt() < 3. ) continue;}
 				//D0pTThree++;
 								
 				//D0Candidates++;
@@ -752,7 +727,7 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 				DsAfterLorentzVector++;
 								                      											
 				//Difference between D* and D0 -> Must be close to pion
-				if( (dsmass - d0mass) > 0.16) continue;
+				if(selectionCuts) {if( (dsmass - d0mass) > 0.16) continue;}
 				//DsMinusD0++;
 				//DsCandidates++; //Number of D* candidates
 			                       		
@@ -826,8 +801,8 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 }//RecDstarWrongCombination
 
 //***********************************************************************************
+//Evaluate if a particle is stable (status 1). If not it repeat the process until find the a stable one.
 void DstarD0TTree::assignStableDaughters(const reco::Candidate* p, std::vector<int> & pids){
-	//Evaluate if a particle is stable (status 1). If not it repeat the process until find the a stable one.
 	for(size_t i=0; i< p->numberOfDaughters(); i++)
 	{
 		if(p->daughter(i)->status() == 1)	pids.push_back(abs(p->daughter(i)->pdgId()));
@@ -910,12 +885,12 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 	for(size_t i = 0; i < goodTracksD0.size(); i++)
 	{
-		TransientTrack trk1D0 = goodTracks[i];
+		TransientTrack trk1D0 = goodTracksD0[i];
 
 		for(size_t j=i+1;j<goodTracksD0.size();j++)
 		{
 			TracksD0combination++;
-			TransientTrack trk2D0 = goodTracksD0[i];
+			TransientTrack trk2D0 = goodTracksD0[j];
 			//Testing charge and if tracks are equal
 			if(trk1D0 == trk2D0) continue;
 			if(trk1D0.charge() == trk2D0.charge()) continue;
@@ -925,10 +900,8 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 			//TransientTrack KfromD0 = 0, PifromD0 = 0;	
 			TransientTrack KfromD0 , PifromD0 ;	        
-            
-			comb1 = comb2 = false ;
-			mass1 = mass2 = 0 ;
-			combOR = false;
+            	
+			mass1 = mass2 = 0. ;
 
 			//Reconstructio of 4-vector D0 Prompt for track1 = Kaon and track2 = pion
 			vD0kaon.SetPtEtaPhiM(trk1D0.track().pt(), 
@@ -939,7 +912,7 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 										trk2D0.track().eta(), 
 										trk2D0.track().phi(), 
 										pi_mass);
-			vD0_1 = vD0kaon + vD0kaon;
+			vD0_1 = vD0kaon + vD0pion;
 			mass1 = vD0_1.M();
 
 			//Reconstruction of 4-vector D0 Prompt track1 = pion and track2 = Kaon
@@ -951,11 +924,13 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 										trk2D0.track().eta(), 
 										trk2D0.track().phi(), 
 										k_mass);
-			vD0_2 = vD0kaon + vD0kaon;
+			vD0_2 = vD0pion + vD0kaon;
 			mass2 = vD0_2.M();
 
-			if( fabs(mass1-1.86484) < 1.0) comb1 = true;		
-			if( fabs(mass2-1.86484) < 1.0) comb2 = true;
+			comb1 = comb2 = false ;
+			if( fabs(mass1-1.86484) < 0.2) {comb1 = true;}		
+			if( fabs(mass2-1.86484) < 0.2) {comb2 = true;}
+
 			//=============================
 			//combinations						
 			for( int icomb = 0; icomb<3; icomb++) 
@@ -990,8 +965,9 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 				D0PromptKpiAfterTransientp0++;
 
 				//SV Confidence Level
-				if(D0KpivtxProb < 0.01) continue;
+				if(selectionCuts) {if(D0KpivtxProb < 0.01) continue;}
 				D0PromptSVConfidenceLevel++;
+
 
 				math::XYZTLorentzVector p4_KfromD0(KfromD0_f.track().px(),
 																KfromD0_f.track().py(),
@@ -1006,7 +982,7 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 				//Angle between formation and decay of D0
 				double dispAngle = FindAngle(RecVtx,v_D0,d0kpi_p4);
 				double D0cosPhi = cos(dispAngle);
-				if( D0cosPhi < 0.99 ) continue;
+				if(selectionCuts) {if( D0cosPhi < 0.99 ) continue;}
 				D0PromptPointingCosPhi++;
 				//D0 Significance
 				VertexDistanceXY vD0KpidXY ;			
@@ -1021,16 +997,18 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 				double D0Kpis3D = D0Kpid3D / D0Kpie3D;
 
 				//cout << "significance 3D: "<< D0Kpis3D << endl;
-				if( D0Kpis3D < 3. ) continue;
+				if(selectionCuts) {if( D0Kpis3D < D0Significance3D_ ) continue;}
 				D0PromptSignificance++;
 
 				//Vetorial product of 4-momentum Kaon and 4-momentum D0
 				double D0_kT = sqrt( (K_p).Cross(D0_p).Mag2() / D0_p.Mag2() ) ;
 				double d0kpimass = d0kpi_p4.M();
 				//cout << "d0kpimass comb1: " << d0kpimass << endl;
-				if(fabs(d0kpimass - 1.86484)>0.15) continue;
+				if(selectionCuts) {if(fabs(d0kpimass - 1.86484)>0.15) continue;}
 				D0PromptCandidates++;
 				ND0KpiCand++;
+
+				cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$parte9 "<< "mass1: "<< mass1 << "  ## mass2: "<< mass2 << endl;
 
 				D0Kpi_VtxProb.push_back(D0KpivtxProb);
 				D0Kpimass.push_back(d0kpi_p4.M());
@@ -1296,7 +1274,7 @@ void DstarD0TTree::endJob(){
 
 	cout <<"######################################################################"<<endl;
 	cout << "Number of Events: " << eventNumber << " Run Number: " << runNumber << endl;
-	cout << "Total events: " << counter << " # Total events triggered by " << triggerName_ << ": " << Triggered_Event << endl;
+	cout << "Total events: " << Total_Events_test << " # Total events triggered by " << triggerName_ << ": " << Triggered_Event_test << endl;
 	cout << "D* Candidates: " << DsCandidates << " # D0 Candidates: " << D0PromptCandidates << endl;
     
 }
@@ -1326,7 +1304,6 @@ void DstarD0TTree::beginJob(){
 	data->Branch("ntracksD0Kpi",&ntracksD0Kpi,"ntracksD0Kpi/I");
 	data->Branch("ntracksDstar",&ntracksDstar,"ntracksDstar/I");
 
-	data->Branch("procId",&procId,"procId/I");
 
 	//Counters
 	data->Branch("TotalTracks",&TotalTracks,"TotalTracks/L");

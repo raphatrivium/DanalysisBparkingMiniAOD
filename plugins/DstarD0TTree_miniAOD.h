@@ -122,7 +122,7 @@ class DstarD0TTree : public edm::EDAnalyzer {
 
 
 		// ----------member data ---------------------------
-		bool doMC, doRec,debug;
+		bool doMC, doRec, debug, selectionCuts, triggerOn;
 		double pi_mass, k_mass;
       std::string triggerName_;
 		std::vector<int> dScandsKpi;
@@ -151,19 +151,9 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		TransientVertex v_D0;
 		math::XYZTLorentzVector d0kpi_p4;
 
-		edm::InputTag particleFlowTag_;
-
-		double Ebeam_;
-		double comEnergy_;
-		int TTBit_8,TTBit_9,TTBit_10,TTBit_32,TTBit_33,TTBit_34; 
-
-		int Total_Events;
-
-		bool signalpf;      
-
-		int procId;
-		int nHFPlus;
-		int nHFMinus;
+		double Ebeam_;		double comEnergy_;
+		double DstarSignificance3D_ ;
+		double D0Significance3D_;
 
 		//counters
 		//int TotalTracks, TracksAfterTrigger, TracksHasTrackDetails, TracksChargeZero, TracksEta, TracksHighPurity, TracksPDG211;
@@ -186,9 +176,9 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		unsigned long D0PromptSignificance, D0PromptCandidates, D0PromptTracksEta2p5;
 		unsigned long D0PromptKpiAfterTransientp0;
 
-		int counter,runNumber,eventNumber,lumi;
-		unsigned long Triggered_Event;
-		int ND0KpiCand, NKpiCand,NdsKpiMC,FlagMC,FlagRec,n_pVertex,ntracksD0Kpi,ntracksDstar,HLTPath_,TTBit_;   
+		int Total_Events,runNumber,eventNumber,lumi;
+		int Total_Events_test, Triggered_Event, Triggered_Event_test;
+		int ND0KpiCand, NKpiCand,NdsKpiMC,FlagMC,FlagRec,n_pVertex,ntracksD0Kpi,ntracksDstar,HLTPath_ ;   
 
 		double PVx,PVy,PVz,PVerrx,PVerry,PVerrz,lumiWeight_;  
 		double HFEnergyMinus,HFEnergyPlus; 
