@@ -1,0 +1,68 @@
+$ cp /eos/user/r/ragomesd/analysisB2019/analysisB2019_teste6.cc . && root -l -b -q analysisB2019_teste6.cc++
+root [0] 
+Processing analysisB2019_teste6.cc++...
+Info in <TUnixSystem::ACLiC>: creating shared library /eos/home-r/ragomesd/crab/MinBias_TuneCP5_13TeV-pythia8/Ds_MC_13TeV-pythia8/191112_183211/0000/./analysisB2019_teste6_cc.so
+Teste 1 --------------------
+Teste 2 --------------------
+Teste 3 --------------------
+Warning in <TClass::TClass>: no dictionary for class ROOT::TIOFeatures is available
+Teste 4 --------------------
+Teste 5 --------------------
+Number of tree entries: 78000
+Teste 6 --------------------
+Teste 7 --------------------
+Teste 8 --------------------
+*****0per cent done***
+Teste 9 --------------------
+
+ *** Break *** segmentation violation
+
+
+
+===========================================================
+There was a crash.
+This is the entire stack trace of all threads:
+===========================================================
+#0  0x00007f7991cb689e in waitpid () from /lib64/libc.so.6
+#1  0x00007f7991c484e9 in do_system () from /lib64/libc.so.6
+#2  0x00007f799295a694 in TUnixSystem::StackTrace() () from /usr/lib64/root/libCore.so.5.34
+#3  0x00007f7992959ab3 in TUnixSystem::DispatchSignals(ESignals) () from /usr/lib64/root/libCore.so.5.34
+#4  <signal handler called>
+#5  0x00007f798e092260 in int TStreamerInfoActions::VectorLooper::ReadCollectionBasicType<double>(TBuffer&, void*, TStreamerInfoActions::TConfiguration const*) () from /usr/lib64/root/libRIO.so
+#6  0x00007f798dfc34d5 in TBufferFile::ApplySequence(TStreamerInfoActions::TActionSequence const&, void*) () from /usr/lib64/root/libRIO.so
+#7  0x00007f798a619439 in TBranchElement::ReadLeavesMember(TBuffer&) () from /usr/lib64/root/libTree.so
+#8  0x00007f798a60bc61 in TBranch::GetEntry(long long, int) () from /usr/lib64/root/libTree.so
+#9  0x00007f798a61b546 in TBranchElement::GetEntry(long long, int) () from /usr/lib64/root/libTree.so
+#10 0x00007f79892a10a5 in analysisB2019_teste6 () at /eos/home-r/ragomesd/crab/MinBias_TuneCP5_13TeV-pythia8/Ds_MC_13TeV-pythia8/191112_183211/0000/./analysisB2019_teste6.cc:109
+#11 0x00007f79892a1749 in G__analysisB2019_teste6_cc_ACLiC_dict__0_2838 (result7=0x7ffcec1626d0, funcname=<value optimized out>, libp=<value optimized out>, hash=<value optimized out>) at /eos/home-r/ragomesd/crab/MinBias_TuneCP5_13TeV-pythia8/Ds_MC_13TeV-pythia8/191112_183211/0000/analysisB2019_teste6_cc_ACLiC_dict.cxx:82
+#12 0x00007f79912d7ba9 in Cint::G__ExceptionWrapper(int (*)(G__value*, char const*, G__param*, int), G__value*, char*, G__param*, int) () from /usr/lib64/root/libCint.so.5.34
+#13 0x00007f799137ff21 in G__execute_call () from /usr/lib64/root/libCint.so.5.34
+#14 0x00007f7991380d72 in G__call_cppfunc () from /usr/lib64/root/libCint.so.5.34
+#15 0x00007f799135fa35 in G__interpret_func () from /usr/lib64/root/libCint.so.5.34
+#16 0x00007f799134e948 in G__getfunction () from /usr/lib64/root/libCint.so.5.34
+#17 0x00007f799132d15e in G__getitem () from /usr/lib64/root/libCint.so.5.34
+#18 0x00007f7991331ce8 in G__getexpr () from /usr/lib64/root/libCint.so.5.34
+#19 0x00007f799133b1f8 in G__calc_internal () from /usr/lib64/root/libCint.so.5.34
+#20 0x00007f79913ba2e5 in G__process_cmd () from /usr/lib64/root/libCint.so.5.34
+#21 0x00007f799291a7a6 in TCint::ProcessLine(char const*, TInterpreter::EErrorCode*) () from /usr/lib64/root/libCore.so.5.34
+#22 0x00007f7992917f13 in TCint::ProcessLineSynch(char const*, TInterpreter::EErrorCode*) () from /usr/lib64/root/libCore.so.5.34
+#23 0x00007f799287e766 in TApplication::ExecuteFile(char const*, int*, bool) () from /usr/lib64/root/libCore.so.5.34
+#24 0x00007f799287dc17 in TApplication::ProcessLine(char const*, bool, int*) () from /usr/lib64/root/libCore.so.5.34
+#25 0x00007f79924cd811 in TRint::Run(bool) () from /usr/lib64/root/libRint.so.5.34
+#26 0x000000000040103c in main ()
+===========================================================
+
+
+The lines below might hint at the cause of the crash.
+If they do not help you then please submit a bug report at
+http://root.cern.ch/bugs. Please post the ENTIRE stack trace
+from above as an attachment in addition to anything else
+that might help us fixing this issue.
+===========================================================
+#5  0x00007f798e092260 in int TStreamerInfoActions::VectorLooper::ReadCollectionBasicType<double>(TBuffer&, void*, TStreamerInfoActions::TConfiguration const*) () from /usr/lib64/root/libRIO.so
+#6  0x00007f798dfc34d5 in TBufferFile::ApplySequence(TStreamerInfoActions::TActionSequence const&, void*) () from /usr/lib64/root/libRIO.so
+#7  0x00007f798a619439 in TBranchElement::ReadLeavesMember(TBuffer&) () from /usr/lib64/root/libTree.so
+#8  0x00007f798a60bc61 in TBranch::GetEntry(long long, int) () from /usr/lib64/root/libTree.so
+#9  0x00007f798a61b546 in TBranchElement::GetEntry(long long, int) () from /usr/lib64/root/libTree.so
+#10 0x00007f79892a10a5 in analysisB2019_teste6 () at /eos/home-r/ragomesd/crab/MinBias_TuneCP5_13TeV-pythia8/Ds_MC_13TeV-pythia8/191112_183211/0000/./analysisB2019_teste6.cc:109
+===========================================================
