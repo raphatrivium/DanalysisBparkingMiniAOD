@@ -24,11 +24,11 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #'root://cmsxrootd.fnal.gov//store/data/Run2018A/ParkingBPH1/MINIAOD/14May2018-v1/30000/129EAF02-B85A-E811-AC4E-0CC47A1DF818.root'
 #'file:129EAF02-B85A-E811-AC4E-0CC47A1DF818.root' #Data mniAOD
-'file:EA334703-C759-E811-B440-008CFAE45030_BParking1.root'
+#'file:EA334703-C759-E811-B440-008CFAE45030_BParking1.root'
 #'file:F800AD57-C458-E811-AC54-0025904C67B4_BParking2.root'
 #'file:E0B15542-285A-E811-A365-001E67E71D03_BParking3.root'
 #'file:FCC64175-325A-E811-A1EF-FA163E17FD8B_BParking4.root'
-#'file:FA6C34C5-8E58-E811-8048-008CFAFBE5CE_Bparking5.root'
+'file:FCB39B8B-FE58-E811-B8D3-FA163EF8FD87_BParking5.root'
 #'file:FCEDA0BD-3F5B-E811-98D6-68B59972BF74_BParking6.root'
 	   )
 )
@@ -43,7 +43,7 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	objects = cms.InputTag("selectedPatTrigger"),
 	#PathName = cms.untracked.string("HLT_Mu8p5_IP3p5_part0"), #triggerName
 	#PathName = cms.untracked.string("HLT_Mu12_IP6_part0"),  #triggerName
-	PathName = cms.untracked.string("HLT_Mu9_IP6_part0"),  #triggerName	
+	PathName = cms.untracked.string("HLT_Mu9_IP6"),  #triggerName	
 	tracks = cms.InputTag('packedPFCandidates'),#linked to vector<pat::PackedCandidate
 	recVtxs = cms.InputTag('offlineSlimmedPrimaryVertices'), #linked to vector<reco::Vertex> 
 	gens = cms.InputTag("prunedGenParticles"), #linked to reco::GenParticleCollection
@@ -54,8 +54,8 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	debug = cms.untracked.bool(False),
 	DstarSignificance3D = cms.double(3.),
 	D0Significance3D = cms.double(3.),
-	selectionCuts = cms.bool(True), #Apply Cuts Online
-	triggerOn = cms.bool(False) #Apply Trigger Selection
+	selectionCuts = cms.bool(False), #Apply Cuts Online
+	triggerOn = cms.bool(True) #Apply Trigger Selection
 )
 
 process.TFileService = cms.Service("TFileService",

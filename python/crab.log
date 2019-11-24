@@ -1,0 +1,387 @@
+DEBUG 2019-11-12 18:08:32.486 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-12 18:08:32.516 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-12 18:08:32.517 UTC: 	 Executing command: 'checkwrite'
+DEBUG 2019-11-12 18:08:32.518 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-12 18:08:32.569 UTC: 	 Checking credentials
+DEBUG 2019-11-12 18:08:32.570 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 18:08:32.570 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 18:08:33.580 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 42848
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 18:08:34.487 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 42847
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 18:08:34.487 UTC: 	 Proxy lifetime 42848 secs is different from voms extension lifetime 42847 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-12 18:08:34.487 UTC: 	 Proxy valid for 11:54:07 hours
+DEBUG 2019-11-12 18:08:34.601 UTC: 	 Executing : 
+ command : openssl x509 -in ~/.globus/usercert.pem -subject -noout
+ output : subject= /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ragomesd/CN=829123/CN=Raphael Gomes De Souza
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 18:08:34.602 UTC: 	 Checking credentials
+DEBUG 2019-11-12 18:08:34.602 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 18:08:34.602 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 18:08:35.810 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 42846
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 18:08:36.720 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 42845
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 18:08:36.721 UTC: 	 Proxy lifetime 42846 secs is different from voms extension lifetime 42845 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-12 18:08:36.721 UTC: 	 Proxy valid for 11:54:05 hours
+DEBUG 2019-11-12 18:08:37.529 UTC: 	 Executing : 
+ command : env X509_USER_PROXY=/tmp/x509up_u112971 voms-proxy-info -fqan
+ output : /cms/Role=NULL/Capability=NULL
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 18:08:37.531 UTC: 	 Command use: checkwrite
+DEBUG 2019-11-12 18:08:37.532 UTC: 	 Options use: ['--site', 'T2_CH_CERNBOX']
+DEBUG 2019-11-12 18:08:37.532 UTC: 	 Instance is None
+DEBUG 2019-11-12 18:08:37.532 UTC: 	 Server base url is None
+INFO 2019-11-12 18:08:37.535 UTC: 	 Will check write permission in the default location /store/user/<username>
+INFO 2019-11-12 18:08:37.536 UTC: 	 Retrieving DN from proxy...
+INFO 2019-11-12 18:08:38.711 UTC: 	 DN is: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ragomesd/CN=829123/CN=Raphael Gomes De Souza
+INFO 2019-11-12 18:08:38.711 UTC: 	 Retrieving username for this DN...
+DEBUG 2019-11-12 18:08:38.712 UTC: 	 Retrieving username from SiteDB...
+DEBUG 2019-11-12 18:08:41.850 UTC: 	 Username is: ragomesd
+DEBUG 2019-11-12 18:08:41.851 UTC: 	 Retrieving username from CRIC...
+DEBUG 2019-11-12 18:08:45.468 UTC: 	 Username is: ragomesd
+INFO 2019-11-12 18:08:45.468 UTC: 	 username is ragomesd
+INFO 2019-11-12 18:08:45.469 UTC: 	 Validating LFN /store/user/ragomesd...
+INFO 2019-11-12 18:08:45.469 UTC: 	 LFN /store/user/ragomesd is valid.
+INFO 2019-11-12 18:08:45.485 UTC: 	 Will use `gfal-copy`, `gfal-rm` commands for checking write permissions
+INFO 2019-11-12 18:08:45.485 UTC: 	 Will check write permission in /store/user/ragomesd on site T2_CH_CERNBOX
+INFO 2019-11-12 18:08:45.548 UTC: 	 
+Attempting to create (dummy) directory crab3checkwrite_20191112_190845 and copy (dummy) file crab3checkwrite_20191112_190845.tmp to /store/user/ragomesd
+
+INFO 2019-11-12 18:08:45.552 UTC: 	 Executing command: which scram >/dev/null 2>&1 && eval `scram unsetenv -sh`; gfal-copy -p -v -t 180 file:///afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab3checkwrite_20191112_190845.tmp 'gsiftp://eosuserftp.cern.ch/eos/user/r/ragomesd/crab3checkwrite_20191112_190845/crab3checkwrite_20191112_190845.tmp'
+INFO 2019-11-12 18:08:45.553 UTC: 	 Please wait...
+INFO 2019-11-12 18:08:46.866 UTC: 	 
+Successfully created directory crab3checkwrite_20191112_190845 and copied file crab3checkwrite_20191112_190845.tmp to /store/user/ragomesd
+INFO 2019-11-12 18:08:46.867 UTC: 	 
+Attempting to delete file gsiftp://eosuserftp.cern.ch/eos/user/r/ragomesd/crab3checkwrite_20191112_190845/crab3checkwrite_20191112_190845.tmp
+
+INFO 2019-11-12 18:08:46.867 UTC: 	 Executing command: which scram >/dev/null 2>&1 && eval `scram unsetenv -sh`; gfal-rm -v -t 180 'gsiftp://eosuserftp.cern.ch/eos/user/r/ragomesd/crab3checkwrite_20191112_190845/crab3checkwrite_20191112_190845.tmp'
+INFO 2019-11-12 18:08:46.867 UTC: 	 Please wait...
+INFO 2019-11-12 18:08:47.273 UTC: 	 
+Successfully deleted file gsiftp://eosuserftp.cern.ch/eos/user/r/ragomesd/crab3checkwrite_20191112_190845/crab3checkwrite_20191112_190845.tmp
+INFO 2019-11-12 18:08:47.273 UTC: 	 
+Attempting to delete directory gsiftp://eosuserftp.cern.ch/eos/user/r/ragomesd/crab3checkwrite_20191112_190845/
+
+INFO 2019-11-12 18:08:47.274 UTC: 	 Executing command: which scram >/dev/null 2>&1 && eval `scram unsetenv -sh`; gfal-rm -r -v -t 180 'gsiftp://eosuserftp.cern.ch/eos/user/r/ragomesd/crab3checkwrite_20191112_190845/'
+INFO 2019-11-12 18:08:47.274 UTC: 	 Please wait...
+INFO 2019-11-12 18:08:47.691 UTC: 	 
+Successfully deleted directory gsiftp://eosuserftp.cern.ch/eos/user/r/ragomesd/crab3checkwrite_20191112_190845/
+INFO 2019-11-12 18:08:47.796 UTC: 	 
+Checkwrite Result:
+INFO 2019-11-12 18:08:47.796 UTC: 	 Success: Able to write in /store/user/ragomesd on site T2_CH_CERNBOX
+DEBUG 2019-11-12 19:02:51.327 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-12 19:02:51.344 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-12 19:02:51.344 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-12 19:02:51.436 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-12 19:02:51.445 UTC: 	 Checking credentials
+DEBUG 2019-11-12 19:02:51.446 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 19:02:51.446 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 19:02:52.464 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 39589
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:02:53.272 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 39588
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:02:53.272 UTC: 	 Proxy lifetime 39589 secs is different from voms extension lifetime 39588 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-12 19:02:53.272 UTC: 	 Proxy valid for 10:59:48 hours
+DEBUG 2019-11-12 19:02:53.273 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2019-11-12 19:07:22.079 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-12 19:07:22.097 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-12 19:07:22.098 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-12 19:07:22.199 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-12 19:07:22.220 UTC: 	 Checking credentials
+DEBUG 2019-11-12 19:07:22.221 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 19:07:22.221 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 19:07:23.130 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 39318
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:07:24.052 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 39318
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:07:24.052 UTC: 	 Proxy valid for 10:55:18 hours
+DEBUG 2019-11-12 19:07:24.053 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2019-11-12 19:36:41.281 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-12 19:36:41.302 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-12 19:36:41.303 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-12 19:36:41.423 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-12 19:36:41.464 UTC: 	 Checking credentials
+DEBUG 2019-11-12 19:36:41.465 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:41.465 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 19:36:42.471 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 37559
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:43.277 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 37558
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:43.278 UTC: 	 Proxy lifetime 37559 secs is different from voms extension lifetime 37558 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:43.278 UTC: 	 Proxy valid for 10:25:58 hours
+DEBUG 2019-11-12 19:36:43.278 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2019-11-12 19:36:43.334 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-12 19:36:43.367 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-12 19:36:43.367 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-12 19:36:43.367 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-12 19:36:43.376 UTC: 	 Checking credentials
+DEBUG 2019-11-12 19:36:43.376 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:43.376 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 19:36:44.184 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 37557
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:45.092 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 37556
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:45.092 UTC: 	 Proxy lifetime 37557 secs is different from voms extension lifetime 37556 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:45.092 UTC: 	 Proxy valid for 10:25:56 hours
+DEBUG 2019-11-12 19:36:45.093 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2019-11-12 19:36:45.150 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-12 19:36:45.165 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-12 19:36:45.166 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-12 19:36:45.166 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-12 19:36:45.173 UTC: 	 Checking credentials
+DEBUG 2019-11-12 19:36:45.174 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:45.174 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 19:36:45.979 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 37556
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:46.787 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 37555
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:46.787 UTC: 	 Proxy lifetime 37556 secs is different from voms extension lifetime 37555 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:46.788 UTC: 	 Proxy valid for 10:25:55 hours
+DEBUG 2019-11-12 19:36:46.788 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2019-11-12 19:36:46.838 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-12 19:36:46.859 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-12 19:36:46.860 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-12 19:36:46.860 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-12 19:36:46.869 UTC: 	 Checking credentials
+DEBUG 2019-11-12 19:36:46.870 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:46.870 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 19:36:47.677 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 37554
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:48.589 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 37553
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:48.590 UTC: 	 Proxy lifetime 37554 secs is different from voms extension lifetime 37553 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:48.590 UTC: 	 Proxy valid for 10:25:53 hours
+DEBUG 2019-11-12 19:36:48.591 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2019-11-12 19:36:48.651 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-12 19:36:48.669 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-12 19:36:48.669 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-12 19:36:48.669 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-12 19:36:48.677 UTC: 	 Checking credentials
+DEBUG 2019-11-12 19:36:48.679 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:48.679 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-12 19:36:49.585 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 37552
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:50.492 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 37551
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-12 19:36:50.493 UTC: 	 Proxy lifetime 37552 secs is different from voms extension lifetime 37551 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-12 19:36:50.493 UTC: 	 Proxy valid for 10:25:51 hours
+DEBUG 2019-11-12 19:36:50.494 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2019-11-13 03:43:14.612 UTC: 	 Running on: Linux lxplus626.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-13 03:43:14.629 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-13 03:43:14.630 UTC: 	 Executing command: 'status'
+DEBUG 2019-11-13 03:43:14.632 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+ERROR 2019-11-13 03:43:14.659 UTC: 	 Error: crab_projects/crab_crab_Bparking1_Run2018A/ is not a valid CRAB project directory.
+ERROR 2019-11-13 03:43:14.660 UTC: 	 Caught exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911/bin/crab", line 160, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911/bin/crab", line 145, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911/lib/python2.7/site-packages/CRABClient/Commands/status.py", line 40, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 276, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 594, in validateOptions
+    raise ConfigurationException(msg)
+ConfigurationException: [91mError[0m: crab_projects/crab_crab_Bparking1_Run2018A/ is not a valid CRAB project directory.
+DEBUG 2019-11-18 11:58:58.529 UTC: 	 Running on: Linux lxplus620.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-18 11:58:58.546 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-18 11:58:58.547 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-18 11:58:58.548 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-18 11:58:58.557 UTC: 	 Checking credentials
+DEBUG 2019-11-18 11:58:58.558 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-18 11:58:58.558 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-18 11:58:59.667 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 58834
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-18 11:59:00.475 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 58833
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-18 11:59:00.475 UTC: 	 Proxy lifetime 58834 secs is different from voms extension lifetime 58833 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-18 11:59:00.475 UTC: 	 Proxy valid for 16:20:33 hours
+INFO 2019-11-18 11:59:00.475 UTC: 	 Will use CRAB configuration file Private_crab_Dstar_MC.py
+DEBUG 2019-11-18 11:59:00.476 UTC: 	 Loading CRAB configuration file.
+DEBUG 2019-11-18 11:59:00.480 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2019-11-18 11:59:00.501 UTC: 	 Working area '/afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_WithoutCuts' already exists 
+Please change the requestName in the config file
+ERROR 2019-11-18 11:59:00.501 UTC: 	 Caught exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/bin/crab", line 160, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/bin/crab", line 145, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 324, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/ClientUtilities.py", line 413, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_WithoutCuts' already exists 
+Please change the requestName in the config file
+DEBUG 2019-11-19 17:33:35.250 UTC: 	 Running on: Linux lxplus603.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-19 17:33:35.281 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-19 17:33:35.282 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-19 17:33:35.283 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-19 17:33:35.293 UTC: 	 Checking credentials
+DEBUG 2019-11-19 17:33:35.294 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-19 17:33:35.294 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-19 17:33:36.414 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 86141
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-19 17:33:37.530 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 86140
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-19 17:33:37.531 UTC: 	 Proxy lifetime 86141 secs is different from voms extension lifetime 86140 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-19 17:33:37.531 UTC: 	 Proxy valid for 23:55:40 hours
+INFO 2019-11-19 17:33:37.531 UTC: 	 Will use CRAB configuration file crab_Official_Dstar_MC.py
+DEBUG 2019-11-19 17:33:37.531 UTC: 	 Loading CRAB configuration file.
+ERROR 2019-11-19 17:33:37.542 UTC: 	 Error while loading CRAB configuration:
+name 'Data' is not defined
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2019-11-19 17:33:37.542 UTC: 	 Caught exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/bin/crab", line 160, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/bin/crab", line 145, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 320, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 88, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+name 'Data' is not defined
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+DEBUG 2019-11-20 13:26:26.885 UTC: 	 Running on: Linux lxplus603.cern.ch 2.6.32-754.23.1.el6.x86_64 #1 SMP Thu Sep 26 11:57:28 CEST 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2019-11-20 13:26:26.931 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2019-11-20 13:26:26.931 UTC: 	 Executing command: 'submit'
+DEBUG 2019-11-20 13:26:26.932 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2019-11-20 13:26:26.943 UTC: 	 Checking credentials
+DEBUG 2019-11-20 13:26:26.944 UTC: 	 Found proxy file /tmp/x509up_u112971
+DEBUG 2019-11-20 13:26:26.944 UTC: 	 Getting proxy life time left
+DEBUG 2019-11-20 13:26:28.162 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 14569
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-20 13:26:29.170 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -actimeleft
+ output : 14568
+
+ error: 
+ retcode : 0
+DEBUG 2019-11-20 13:26:29.170 UTC: 	 Proxy lifetime 14569 secs is different from voms extension lifetime 14568 secs for proxy: /tmp/x509up_u112971
+DEBUG 2019-11-20 13:26:29.171 UTC: 	 Proxy valid for 04:02:48 hours
+INFO 2019-11-20 13:26:29.171 UTC: 	 Will use CRAB configuration file crab_Official_Dstar_MC.py
+DEBUG 2019-11-20 13:26:29.171 UTC: 	 Loading CRAB configuration file.
+DEBUG 2019-11-20 13:26:29.182 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2019-11-20 13:26:29.182 UTC: 	 Working area '/afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_Official_HLT_Mu8_IP3' already exists 
+Please change the requestName in the config file
+ERROR 2019-11-20 13:26:29.182 UTC: 	 Caught exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/bin/crab", line 160, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/bin/crab", line 145, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 324, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1911.patch1/lib/python2.7/site-packages/CRABClient/ClientUtilities.py", line 413, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_Official_HLT_Mu8_IP3' already exists 
+Please change the requestName in the config file

@@ -39,7 +39,7 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	objects = cms.InputTag("selectedPatTrigger"),
 	#PathName = cms.untracked.string("HLT_Mu8p5_IP3p5_part0"), #triggerName
 	#PathName = cms.untracked.string("HLT_Mu12_IP6_part0"),  #triggerName
-	PathName = cms.untracked.string("HLT_Mu9_IP6_part0"),  #triggerName
+	PathName = cms.untracked.string("HLT_Mu10p5_IP3p5"),  #triggerName
 	tracks = cms.InputTag('packedPFCandidates'),#linked to vector<pat::PackedCandidate
 	recVtxs = cms.InputTag('offlineSlimmedPrimaryVertices'), #linked to vector<reco::Vertex> 
 	gens = cms.InputTag("prunedGenParticles"), #linked to reco::GenParticleCollection
@@ -48,9 +48,9 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	comEnergy = cms.double(13000.),
 	#TTBIt = cms.int32(34),
 	debug = cms.untracked.bool(False),
-	DstarSignificance3D = cms.double(0.3),
-	D0Significance3D = cms.double(3.),
-	selectionCuts = cms.bool(True), #Apply Cuts Online
+	DstarSignificance3D = cms.double(1.0),
+	D0Significance3D = cms.double(1.0),
+	selectionCuts = cms.bool(False), #Apply Cuts Online
 	triggerOn = cms.bool(False) #Apply Trigger Selection
 )
 

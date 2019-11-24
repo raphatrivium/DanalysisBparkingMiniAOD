@@ -161,7 +161,7 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	using namespace edm;
 	using namespace std;
 	using namespace reco;
-	pi_mass=0.13957018; k_mass=0.493677;
+	pi_mass=0.13957061; k_mass=0.493677;
 	Total_Events_test++; 
 	//To clear and initialize variables
 	initialize();
@@ -205,7 +205,13 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	//miniAOD
 	edm::ESHandle<TransientTrackBuilder> theB; 
 	iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
-	
+
+	//To do the analisys with trigger or without trigger
+	//if( (triggerComb == 0 and triggerOn and triggerFired  ) || //With trigger
+   // (triggerComb == 1 and triggerOn )                 )  )  //Without Trigger
+   // {canDo = true; }
+
+	//To do the analisys with trigger or without trigger
 	bool canDo= false;
 	for( int triggerComb = 0; triggerComb<2; triggerComb++) //For trigger selection on and off
 	{
@@ -303,9 +309,9 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
    	}//loop packed candidates
 	
 
-	if (debug) cout << " goodTracks size " << goodTracks.size() << endl;
-    ntracksDstar = slowPiTracks.size();
-    ntracksD0Kpi = goodTracksD0.size();
+		if (debug) cout << " goodTracks size " << goodTracks.size() << endl;
+    	ntracksDstar = slowPiTracks.size();
+    	ntracksD0Kpi = goodTracksD0.size();
 	
 		//Vertex Informations
 		size_t vtx_trk_size = (*recVtxs)[0].tracksSize();
@@ -314,11 +320,9 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	  	{
       	const Vertex &vtx = (*recVtxs)[i];
       	if(vtx.tracksSize()>vtx_trk_size)
-         {
-         	VtxIn = i;
-         	vtx_trk_size = vtx.tracksSize();
-         }
+         { VtxIn = i; vtx_trk_size = vtx.tracksSize(); }
 		}
+
     	const Vertex& RecVtx = (*recVtxs)[VtxIn];
       n_pVertex = recVtxs->size();
       PVx = RecVtx.x();
@@ -352,29 +356,23 @@ bool DstarD0TTree::TriggerInfo(const edm::Event& iEvent, edm::Handle<edm::Trigge
 	//for (unsigned int k = 0, nt = itriggerBits->size(); k < nt; ++k) 
 	//{std::cout << "Trigger name: "<< names.triggerName(k) << std::endl;}
 
+	bool foundtrigger = false;
 	//std::cout << "\n == TRIGGER PATHS FOUND =" ;
 	for (unsigned int i = 0, n = itriggerBits->size(); i < n; ++i) 
-	{	
+	{		
 		TString trigName = names.triggerName(i);
 		if(trigName.Contains(trigname)) 
-		{ 
+		{  foundtrigger = true;
 			std::cout << "TRIGGER PATHS FOUND: " << names.triggerName(i) <<
 			", prescale " << itriggerPrescales->getPrescaleForIndex(i) <<
-			": " << (itriggerBits->accept(i) ? "PASS" : "fail (or not run) --");
+			": " << (itriggerBits->accept(i) ? "PASS" : "fail (or not run) --") << endl;
 			
 			if (itriggerBits->accept(i) )
-			{
-				std::cout << "itriggerBits->accept(i): " << itriggerBits->accept(i) << std::endl; std::cout << "---" << std::endl;
-				return true;
-			}
-			else
-			{
-				std::cout << "itriggerBits->accept(i): " << itriggerBits->accept(i) << std::endl; std::cout << "---" << std::endl;
-				return false;
-			} 		
-      }     	
+			{std::cout << "itriggerBits->accept(i): " << itriggerBits->accept(i) << std::endl; std::cout << "---" << std::endl;	return true;}
+		} 		
 	}
-	std::cout << "**TRIGGER PATHS NOT FOUND**" << std::endl; std::cout << "---" << std::endl;
+		    	
+	if (!foundtrigger) {std::cout << "**TRIGGER PATHS NOT FOUND**" << std::endl; std::cout << "---" << std::endl;}
 	return false;
 }
 
@@ -396,12 +394,10 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 			//cout << goodTracks[i].track().momentum() << goodTracks[j].track().momentum() << endl;
 
 			if(trk1.charge() == trk2.charge()) continue;
-			//cout <<   trk1.track().momentum() <<    trk2.track().momentum() << endl;
 
 			for(size_t k=0;k<slowPiTracks.size();k++)
 			{
 				TransientTrack trkS = slowPiTracks[k];
-				//cout << "Slow Pions Tracks(px,py,pz): "  << trkS.track().momentum() << endl;                
 
 				if(trkS == trk1 || trkS == trk2) continue;
 				
@@ -413,7 +409,7 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 
 				//Wrong Combination Charges - background
 				/*if(trk1.charge() == trkS.charge()){pi = trk2;	K = trk1;}
-				else{K = trk2;pi = trk1;}	*/
+				else{K = trk2;pi = trk1;}*/
                                
 				//D0 4-momentum Reconstruction (kaon and pion)
 				math::XYZTLorentzVector ip4_K(K.track().px(),
@@ -452,7 +448,10 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent, const edm::EventSetup& iSe
 				KalmanVertexFitter kalman(true);
 				TransientVertex v = kalman.vertex(tks);
 				if(!v.isValid() || !v.hasRefittedTracks()) continue;
+
+				//Vertex Probability
 				double vtxProb =TMath::Prob( (Double_t) v.totalChiSquared(), (Int_t) v.degreesOfFreedom());
+
 				TransientTrack K_f = v.refittedTrack(K);
 				TransientTrack pi_f = v.refittedTrack(pi);
 				TransientTrackOfpiK++;
@@ -656,7 +655,7 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 				//D0MinusPDGzero2++;
 
 				//To descrase statistc to gain speed. we have more tight cut below
-				if((ip4_DS.M() - ip4_D0.M()) > 0.3) continue;
+				if((ip4_DS.M() - ip4_D0.M()) > 0.2) continue;
  				//cout << "ip4_DS.M() :" << ip4_DS.M() << " ip4_D0.M(): " << ip4_D0.M() << endl;
 				//DsMinusD0Zerothree++;
 				                      
@@ -667,7 +666,10 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent, const edm:
 				KalmanVertexFitter kalman(true);
 				TransientVertex v = kalman.vertex(tks);
 				if(!v.isValid() || !v.hasRefittedTracks()) continue;
+
+				//Vertex Probability
 				double vtxProb =TMath::Prob( (Double_t) v.totalChiSquared(), (Int_t) v.degreesOfFreedom());
+
 				TransientTrack K_f = v.refittedTrack(K);
 				TransientTrack pi_f = v.refittedTrack(pi);
 				//TransientTrackOfpiK++;
@@ -935,18 +937,13 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			//combinations						
 			for( int icomb = 0; icomb<3; icomb++) 
 			{	//Combination 1
-				if (icomb == 0 and comb1 and !comb2)
-				{  KfromD0 = trk1D0; PifromD0 = trk2D0;}
+				if (icomb == 0 and comb1 and !comb2){KfromD0 = trk1D0; PifromD0 = trk2D0;}
 				//Combination 2
-				else if (icomb == 1 and comb2 and !comb1)	
-				{  KfromD0 = trk2D0; PifromD0 = trk1D0;}
+				else if (icomb == 1 and comb2 and !comb1)	{KfromD0 = trk2D0; PifromD0 = trk1D0;}
 				//Combination 1 and 2
 				else if (icomb == 2 and comb1 and comb2)		
-				{ 	if(fabs( mass1-1.864 ) < fabs( mass2-1.864 ))
-					{KfromD0 = trk1D0; PifromD0 = trk2D0;}
-					else
-					{KfromD0 = trk2D0; PifromD0 = trk1D0;} 
-				}		
+				{ 	if(fabs( mass1-1.864 ) < fabs( mass2-1.864 )){KfromD0 = trk1D0; PifromD0 = trk2D0;}
+					else{KfromD0 = trk2D0; PifromD0 = trk1D0;} }		
 				else continue;
 
 				D0PromptminusPDG1p0++;
@@ -959,6 +956,8 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 				v_D0 = kalman.vertex(tksD0);
 				//TransientVertex v_D0 = kalman.vertex(tksD0);
 				if(!v_D0.isValid() || !v_D0.hasRefittedTracks()) continue;
+
+				//Vertex Probability
 				double D0KpivtxProb =TMath::Prob( (Double_t) v_D0.totalChiSquared(), (Int_t) v_D0.degreesOfFreedom());
 				TransientTrack KfromD0_f = v_D0.refittedTrack(KfromD0);
 				TransientTrack pifromD0_f = v_D0.refittedTrack(PifromD0);
@@ -967,7 +966,6 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 				//SV Confidence Level
 				if(selectionCuts) {if(D0KpivtxProb < 0.01) continue;}
 				D0PromptSVConfidenceLevel++;
-
 
 				math::XYZTLorentzVector p4_KfromD0(KfromD0_f.track().px(),
 																KfromD0_f.track().py(),
@@ -984,6 +982,7 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 				double D0cosPhi = cos(dispAngle);
 				if(selectionCuts) {if( D0cosPhi < 0.99 ) continue;}
 				D0PromptPointingCosPhi++;
+
 				//D0 Significance
 				VertexDistanceXY vD0KpidXY ;			
 				double D0KpidXY = vD0KpidXY.distance(RecVtx,v_D0).value() ;
@@ -1007,8 +1006,6 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 				if(selectionCuts) {if(fabs(d0kpimass - 1.86484)>0.15) continue;}
 				D0PromptCandidates++;
 				ND0KpiCand++;
-
-				cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$parte9 "<< "mass1: "<< mass1 << "  ## mass2: "<< mass2 << endl;
 
 				D0Kpi_VtxProb.push_back(D0KpivtxProb);
 				D0Kpimass.push_back(d0kpi_p4.M());
@@ -1275,15 +1272,12 @@ void DstarD0TTree::endJob(){
 	cout <<"######################################################################"<<endl;
 	cout << "Number of Events: " << eventNumber << " Run Number: " << runNumber << endl;
 	cout << "Total events: " << Total_Events_test << " # Total events triggered by " << triggerName_ << ": " << Triggered_Event_test << endl;
-	cout << "D* Candidates: " << DsCandidates << " # D0 Candidates: " << D0PromptCandidates << endl;
     
 }
 
 //***********************************************************************************
 void DstarD0TTree::beginJob(){
-        
-    //cout << "DsCandidates: " << DsCandidates << " NKpiCand: " << NKpiCand << endl;
-	
+        	
 	data->Branch("Total_Events",&Total_Events,"Total_Events/I"); 
 	data->Branch("Triggered_Event",&Triggered_Event,"Triggered_Event/I");
 	data->Branch("TriggerName", &NameTrigger);
@@ -1362,15 +1356,15 @@ void DstarD0TTree::beginJob(){
 	data->Branch("D0phi",&D0phi);
 	data->Branch("Dseta",&Dseta);
 	data->Branch("Dsphi",&Dsphi);
+	data->Branch("D0pt",&D0pt);
+	data->Branch("Dspt",&Dspt);
+	data->Branch("DSDeltaR",&DSDeltaR);
 	data->Branch("TrkKmass",&TrkKmass);
 	data->Branch("Trkpimass",&Trkpimass);
 	data->Branch("TrkSmass",&TrkSmass);
 	data->Branch("TrkKpt",&TrkKpt);
 	data->Branch("Trkpipt",&Trkpipt);
 	data->Branch("TrkSpt",&TrkSpt);
-	data->Branch("D0pt",&D0pt);
-	data->Branch("Dspt",&Dspt);
-	data->Branch("DSDeltaR",&DSDeltaR);
 	data->Branch("TrkKnhits",&TrkKnhits);
 	data->Branch("Trkpinhits",&Trkpinhits);
 	data->Branch("TrkSnhits",&TrkSnhits);
@@ -1470,20 +1464,20 @@ void DstarD0TTree::beginJob(){
 
 	//Variables data
 	data->Branch("D0Kpi_VtxProb",&D0Kpi_VtxProb);
-    data->Branch("D0Kpimass",&D0Kpimass);
-    data->Branch("D0Kpipt",&D0Kpipt);
-    data->Branch("D0Kpieta",&D0Kpieta);
-    data->Branch("D0Kpiphi",&D0Kpiphi);
-    data->Branch("D0Kpi_VtxPosx",&D0Kpi_VtxPosx);
-    data->Branch("D0Kpi_VtxPosy",&D0Kpi_VtxPosy);
-    data->Branch("D0Kpi_VtxPosz",&D0Kpi_VtxPosz);
-    data->Branch("D0Kpi_Vtxerrx",&D0Kpi_Vtxerrx);
-    data->Branch("D0Kpi_Vtxerry",&D0Kpi_Vtxerry);
-    data->Branch("D0Kpi_Vtxerrz",&D0Kpi_Vtxerrz);
-    data->Branch("TrkD0Kdxy",&TrkD0Kdxy);
-    data->Branch("TrkD0pidxy",&TrkD0pidxy);
-    data->Branch("TrkD0Kdz",&TrkD0Kdz);
-    data->Branch("TrkD0pidz",&TrkD0pidz);
+	data->Branch("D0Kpimass",&D0Kpimass);
+	data->Branch("D0Kpipt",&D0Kpipt);
+	data->Branch("D0Kpieta",&D0Kpieta);
+	data->Branch("D0Kpiphi",&D0Kpiphi);
+	data->Branch("D0Kpi_VtxPosx",&D0Kpi_VtxPosx);
+	data->Branch("D0Kpi_VtxPosy",&D0Kpi_VtxPosy);
+	data->Branch("D0Kpi_VtxPosz",&D0Kpi_VtxPosz);
+	data->Branch("D0Kpi_Vtxerrx",&D0Kpi_Vtxerrx);
+	data->Branch("D0Kpi_Vtxerry",&D0Kpi_Vtxerry);
+	data->Branch("D0Kpi_Vtxerrz",&D0Kpi_Vtxerrz);
+	data->Branch("TrkD0Kdxy",&TrkD0Kdxy);
+	data->Branch("TrkD0pidxy",&TrkD0pidxy);
+	data->Branch("TrkD0Kdz",&TrkD0Kdz);
+	data->Branch("TrkD0pidz",&TrkD0pidz);
 	data->Branch("TrkD0Kchi2",&TrkD0Kchi2);
 	data->Branch("TrkD0pichi2",&TrkD0pichi2);
 	data->Branch("TrkD0Kpt",&TrkD0Kpt);

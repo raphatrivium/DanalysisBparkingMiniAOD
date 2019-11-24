@@ -196,7 +196,7 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		TrkD0Kchi2, TrkD0pichi2, D0DeltaR, TrkD0Kpt, TrkD0pipt, D0KpisXY_vec, D0Kpis3D_vec, D0_kT_vec;
 
 		std::vector<double> D0_VtxProb, D0pt, Dspt, D0eta, Dseta, D0phi, Dsphi, D0_VtxPosx, D0_VtxPosy, D0_VtxPosz, 
-		D0_Vtxerrx, D0_Vtxerry, D0_Vtxerrz,TrkKdxy;
+		D0_Vtxerrx, D0_Vtxerry, D0_Vtxerrz, TrkKdxy;
 		std::vector<double> Dsmass, Trkpidxy, TrkSdxy, TrkKdz, Trkpidz, TrkSdz, TrkKnhits, Trkpinhits, TrkSnhits, 
 		TrkKchi2, Trkpichi2, TrkSchi2, DSDeltaR, TrkKpt,Trkpipt;
 		std::vector<double> D0mass, TrkKmass, Trkpimass, TrkSmass, TrkSpt, TrkKeta, Trkpieta, TrkSeta, TrkKphi, 
