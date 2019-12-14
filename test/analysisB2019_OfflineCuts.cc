@@ -535,38 +535,15 @@ void analysisB2019_OfflineCuts()
 	
 		if (debug)cout << "debug 10 --------------------"<< endl;
 
-		
-
-			//std::string s("Hello world");
-
-			//if (s.find("Hello") == 0)
-			//{
-				// std::cout << "String starts with Hello\n";
-			//}
-
-
-
 		//if (std::find(NameOfFiredTriggers->begin(), NameOfFiredTriggers->end(), "HLT_Mu9_IP6_part0") == NameOfFiredTriggers->end()) continue;
-
 		//if (std::find_if(NameOfFiredTriggers->begin(), NameOfFiredTriggers->end(), NameOfFiredTriggers.find("HLT_Mu9_IP6") ) continue;
 		std::cout << "--------------------"<< std::endl;
 
 		for(unsigned int tescont2=0; tescont2 < NameOfFiredTriggers->size(); tescont2++)
 		{  		
-			string teststring = NameOfFiredTriggers->at(tescont2);
-			if (teststring.find("HLT_Mu9_IP6") == 0) {
-			std::cout << "NameOfFiredTriggers ["<< tescont2 <<"]: " << teststring  << std::endl ;
-			continue;}
-
-			//rest of the code
+			string teststring = NameOfFiredTriggers->at(tescont);
+			std::cout << "NameOfFiredTriggers ["<< tescont <<"]: " << teststring  << std::endl;
 		}
-			
-
-		//for(unsigned int tescont2=0; tescont2 < NameOfFiredTriggers->size(); tescont2++)
-		//{  		
-		//	string teststring = NameOfFiredTriggers->at(tescont);
-		//	std::cout << "NameOfFiredTriggers ["<< tescont <<"]: " << teststring  << std::endl;
-		//}
 
 		//----------------------------------------
 		//For D* and D0(from D*)
