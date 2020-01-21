@@ -1024,6 +1024,7 @@ void analysisB2019_OfflineCuts()
 		//	std::cout << "NameOfFiredTriggers ["<< tescont <<"]: " << teststring  << std::endl;}
 
 		b_PUWeight->GetEntry(ientry);
+		//cout << "PUWeight: " << PUWeight << endl;
 
 		EventsAfterTrigger++;
 		//----------------------------------------
