@@ -43,96 +43,50 @@
 #include "TChain.h"
 #include <time.h>
 #include "TLegend.h"
+#include <TLatex.h>
 
 //gSystem->AddIncludePath("/home/raphael/Desktop/analysis_2018");
 
 using namespace std;
-//bool IsOdd (string i) {return (i == 'HLT_Mu9_IP6');}
+TChain *callOneFile(const char* TITLES);
+TChain *callTchain(const char* LOCAL);
+TH1* makeTH1(const char* name, Double_t BIN, Double_t NMIN, Double_t NMAX, const char* TITLES, Color_t COLOR);
+TH1* makeTH1Rec(const char* name, const int nbins_low , double* nbins_high );
 
-//bool IsOdd(string i) { return i = 2;}
-
-//bool FindTrigger(string i) { return i = 2;}
-
-//(s.find("Hello") == 0)
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-TChain *callOneFile(const char* TITLES){
-
-	TChain* chain = new TChain("analysis/data");
-	chain->Add(TITLES);
-	return chain;
-}
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-TChain *callTchain(const char* LOCAL){
-	//READING ALL THE ROOT FILE IN THE LOCAL FOLDER USING TCHAIN
-	const char *dirname = LOCAL; //Directory of the files 
-	const char *ext=".root"; //extenson of files you want add	
-	int added = 0;
-	TChain* chain = new TChain("analysis/data"); 
-   TSystemDirectory dir(dirname, dirname);
-   TList *files = dir.GetListOfFiles();
-	if (files) 
-	{
-      TSystemFile *file;
-      TString fname;
-      TIter next(files);
-      while ((file=(TSystemFile*)next())) 
-		{
-         fname = file->GetName();
-			if (fname.EndsWith(ext))
-			{	cout << "File: "<< fname << endl; 
-				chain->Add(LOCAL+fname);
-				added++;}	       
-     }
-   }
-	cout << "======== " << added << " Files added"<< endl;
-	return chain;
-}
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-TH1* makeTH1(const char* name, Double_t BIN, Double_t NMIN, Double_t NMAX, const char* TITLES, Color_t COLOR) 
-{
-   //Create a TH1D (one dimension) histogram
-   TH1D* hh = new TH1D(name, name, BIN, NMIN, NMAX) ;
-	hh->SetTitle(TITLES);
-	//DsmassHisto->SetName("DsmassHisto");
-	//hh->SetTitle(Form("%s", TITLES.c_str()));
-	hh->SetMarkerStyle(7);
-	hh->SetFillColor(COLOR); //kRed
-	hh->Sumw2();
-	//hh->Draw(TYPE); const char* TYPE
-   return hh ;
-}
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//TBranch* makeBranch(TTree *myTree, const char* name, std::vector<double>* VECTOR) 
-//{
-//	TBranch *branch = myTree->GetBranch(name);
-//	branch->SetAddress(&VECTOR);
-//	return branch ;
-//}
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 void analysisB2019_OfflineCuts()
 {
 	clock_t tStart = clock();
 
-	string Dataset = "MC_DStarToD0Pi_D0KPi"; 
-	//Datasets: BparkingDataset1 - BparkingDataset2 - BparkingDataset3
-	//Datasets: BparkingDataset4 - BparkingDataset5 - BparkingDataset6
-	//Datasets: MC_DStarToD0Pi_D0KPi
+	string Dataset = "MC_DStarToD0Pi_D0KPi";
+	//Datasets: BparkingDataset1 - MC_DStarToD0Pi_D0KPi - MC_MinBias
 
-	string TriggerPath = ""; //HLT_Mu9_IP6
-	 
+	string TriggerPath = ""; //Put "" for select no trigger //HLT_Mu9_IP6
+	if (Dataset != "MC_DStarToD0Pi_D0KPi" and Dataset != "MC_MinBias"){TriggerPath = "HLT_Mu9_IP6";}
+
 	//Save the file
 	string path = "/eos/user/r/ragomesd/crab/haddteste/";
-	double SigCutD0fromDs = 1.0; //3.
-	double SigCutD0 = 1.0; //3.
+	string path2 = "/eos/user/r/ragomesd/analysisB2019/canvas/";
+	double SigCutD0fromDs, SigCutD0;
 
+	if (Dataset != "MC_DStarToD0Pi_D0KPi"){SigCutD0fromDs = 3.; SigCutD0 = 5.; }
+	if (Dataset == "MC_DStarToD0Pi_D0KPi" or Dataset == "MC_MinBias"){SigCutD0fromDs = 0.; SigCutD0 = 0.; }
+
+	bool FlagDs = true;
+	bool FlagDsWrong = true;
+	bool FlagDsMC = true;
+	bool FlagD0 = true;
+	bool FlagD0MC = true;
 	bool debug = false;
-	//eos/user/r/ragomesd/crab
 		
-	//TChain* t1 = callTchain("/eos/user/r/ragomesd/crab/DStarToD0Pi_D0KPi_NoMuFilter_TuneCP5_13TeV-pythia8-evtgen/Ds_MC_Run2018A_Official/191215_044633/0000/");
-	//TChain* t1 = callOneFile("/eos/user/r/ragomesd/testes/D0DstarDataBparking.root");
-	//TChain* t1 = new TChain("analysis/data"); t1->Add("/eos/user/r/ragomesd/crab/ParkingBPH1/ParkingBPH_Run2018A_MINIAOD/191212_023520/0000/D0DstarDataBparking_35.root");
-	TChain* t1 = new TChain("analysis/data"); t1->Add("/afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/D0DstarMC.root");
-	
+	//TChain* t1 = callTchain("/eos/user/r/ragomesd/crab/ParkingBPH2/ParkingBPH_Run2018A_MINIAOD/200105_042547/0000/");
+	TChain* t1 = callTchain("./");
+
+	//**********************************************************		
+	Long64_t nentries = t1->GetEntries(); //Reading Number of tree entries of the file
+	nentries = 100000; //Test
+	cout<< "Number of tree entries: "<< nentries <<std::endl;
+	Long64_t partpercent = nentries*0.05; //Percent done to show
+	double c = 299792458; //Light speed
 	
 	//-------Reading the root file-------------------------------------	
 	//TFile *f1 = new TFile("D0DstarDataBparking_7.root");
@@ -152,6 +106,47 @@ void analysisB2019_OfflineCuts()
 	//It must be equal to "0" and not "0.", even it is a double. Possible segmental error if you compile it with c++.
 	std::vector<string>* NameOfFiredTriggers = 0;
 
+	//Counters
+	unsigned long 	NumberOfEvents, EventsAfterTrigger, 
+						PossibleDs, DsD0ProbVtx, DsD0Angle, D0fromDsMinusPDG, DsD0Sig, DsD0pt,DsD0deltaM,
+						PossibleD0, D0ProbVtx, D0Angle, CountD0minusPDG, D0Sig, CountD0pt;
+
+	NumberOfEvents = 0; EventsAfterTrigger = 0; 
+	PossibleDs = 0; DsD0ProbVtx = 0; DsD0Angle = 0; D0fromDsMinusPDG = 0; DsD0Sig = 0; DsD0pt = 0; DsD0deltaM = 0;
+	PossibleD0 = 0; D0ProbVtx = 0; D0Angle = 0; D0Sig = 0; CountD0minusPDG = 0; CountD0pt = 0;
+
+	unsigned long GenDspT1, GenDspT2, GenDspT3, GenDspT4, GenDspT5, GenDspT6, GenDspT7, GenDspT8, GenDspT9,
+						GenDsEta1, GenDsEta2, GenDsEta3, GenDsEta4, GenDsEta5, GenDsEta6, GenDsEta7, GenDsEta8, 
+						GenDsEta9, GenDsEta10;
+
+	GenDspT1 = 0; GenDspT2 = 0; GenDspT3 = 0; GenDspT4 = 0; GenDspT5 = 0; GenDspT6 = 0; GenDspT7 = 0; GenDspT8 = 0; GenDspT9 = 0;
+	GenDsEta1 = 0; GenDsEta2 = 0; GenDsEta3 = 0; GenDsEta4 = 0; GenDsEta5 = 0; GenDsEta6 = 0; GenDsEta7 = 0; GenDsEta8 = 0; 
+	GenDsEta9 = 0; GenDsEta10 = 0;
+
+	unsigned long RecDspT1, RecDspT2, RecDspT3, RecDspT4, RecDspT5, RecDspT6, RecDspT7, RecDspT8, RecDspT9,
+						RecDsEta1, RecDsEta2, RecDsEta3, RecDsEta4, RecDsEta5, RecDsEta6, RecDsEta7, RecDsEta8, 
+						RecDsEta9, RecDsEta10;
+	
+	RecDspT1 = 0; RecDspT2 = 0; RecDspT3 = 0; RecDspT4 = 0; RecDspT5 = 0; RecDspT6 = 0; RecDspT7 = 0; RecDspT8 = 0; RecDspT9 = 0;
+	RecDsEta1 = 0; RecDsEta2 = 0; RecDsEta3 = 0; RecDsEta4 = 0; RecDsEta5 = 0; RecDsEta6 = 0; RecDsEta7 = 0; RecDsEta8 = 0; 
+	RecDsEta9 = 0; RecDsEta10 = 0;
+
+	unsigned long GenD0pT1, GenD0pT2, GenD0pT3, GenD0pT4, GenD0pT5, GenD0pT6, GenD0pT7, GenD0pT8, GenD0pT9,
+						GenD0Eta1, GenD0Eta2, GenD0Eta3, GenD0Eta4, GenD0Eta5, GenD0Eta6, GenD0Eta7, GenD0Eta8, 
+						GenD0Eta9, GenD0Eta10;
+
+	GenD0pT1 = 0; GenD0pT2 = 0; GenD0pT3 = 0; GenD0pT4 = 0; GenD0pT5 = 0; GenD0pT6 = 0; GenD0pT7 = 0; GenD0pT8 = 0; GenD0pT9 = 0;
+	GenD0Eta1 = 0; GenD0Eta2 = 0; GenD0Eta3 = 0; GenD0Eta4 = 0; GenD0Eta5 = 0; GenD0Eta6 = 0; GenD0Eta7 = 0; GenD0Eta8 = 0; 
+	GenD0Eta9 = 0; GenD0Eta10 = 0;
+
+	unsigned long RecD0pT1, RecD0pT2, RecD0pT3, RecD0pT4, RecD0pT5, RecD0pT6, RecD0pT7, RecD0pT8, RecD0pT9,
+						RecD0Eta1, RecD0Eta2, RecD0Eta3, RecD0Eta4, RecD0Eta5, RecD0Eta6, RecD0Eta7, RecD0Eta8, 
+						RecD0Eta9, RecD0Eta10;
+
+	RecD0pT1 = 0; RecD0pT2 = 0; RecD0pT3 = 0; RecD0pT4 = 0; RecD0pT5 = 0; RecD0pT6 = 0; RecD0pT7 = 0; RecD0pT8 = 0; RecD0pT9 = 0;
+	RecD0Eta1 = 0; RecD0Eta2 = 0; RecD0Eta3 = 0; RecD0Eta4 = 0; RecD0Eta5 = 0; RecD0Eta6 = 0; RecD0Eta7 = 0; RecD0Eta8 = 0; 
+	RecD0Eta9 = 0; RecD0Eta10 = 0;
+
 	//----------------------------------------
 	//For D* 
 	//-----------------------------------------
@@ -168,6 +163,7 @@ void analysisB2019_OfflineCuts()
 	//std::vector<double>* TrkScharge = 0;
 	std::vector<double>* D0fromDSsXY = 0;
 	std::vector<double>* D0fromDSs3D = 0;
+	std::vector<double>* D0fromDSd3D = 0; 
 	std::vector<double>* Anglephi = 0;
 	std::vector<double>* D0_VtxProb = 0;
 
@@ -209,9 +205,11 @@ void analysisB2019_OfflineCuts()
 	double Variable_DSDeltaR = 0.;
 	//double Variable_TrkScharge = 0.;
 	double Variable_D0fromDSsXY = 0.;
-	double Variable_D0fromDSs3D = 0.;
+	double Variable_D0fromDSs3D = 0.; 
+	//double Variable_D0fromDSd3D = 0.;
 	double Variable_Anglephi = 0.;
 	double Variable_D0_VtxProb = 0.;
+	double Variable_Dslifetime = 0.;
 
 	double Variable_TrkKpt = 0.;
 	double Variable_TrkKnhits = 0.;
@@ -313,7 +311,8 @@ void analysisB2019_OfflineCuts()
 	double Variable_D0Kpipt = 0.;
 	double Variable_D0Kpieta = 0.;
 	double Variable_D0Kpiphi = 0.;
-
+	double Variable_D0lifetime = 0.;
+	
 	double Variable_TrkD0Kdxy = 0.;
 	double Variable_TrkD0Kdz = 0.;
 	double Variable_TrkD0Kchi2 = 0.;
@@ -334,6 +333,9 @@ void analysisB2019_OfflineCuts()
 	double Variable_D0Kpid3D = 0.;
 	double Variable_D0Kpie3D = 0.;
 	double Variable_D0_kT = 0.;
+
+	double PUWeight = 0.;
+	
 
 //======================================================
 // MC Variables - D_star
@@ -461,14 +463,14 @@ void analysisB2019_OfflineCuts()
 // MC Matching - D* 
 //======================================================
 
-	std::vector<double>* DsetaMatching = 0;
+	/*std::vector<double>* DsetaMatching = 0;
 	std::vector<double>* MCDsetaMatching = 0;
 	std::vector<double>* DsphiMatching = 0;
 	std::vector<double>* MCDsphiMatching = 0;
 	std::vector<double>* DsptMatching = 0;
 	std::vector<double>* MCDsptMatching = 0; 
 	std::vector<double>* D0fromDsmass = 0;
-	std::vector<double>* deltaRDsMatching = 0;
+	std::vector<double>* deltaRDsMatching = 0;*/
 
 	double Variable_DsetaMatching = 0.;
 	double Variable_MCDsetaMatching = 0.;
@@ -478,12 +480,15 @@ void analysisB2019_OfflineCuts()
 	double Variable_MCDsptMatching = 0.;
 	double Variable_D0fromDsmass = 0.;
 	double Variable_deltaRDsMatching = 0.;
+	double DsdeltaEta = 0.;
+	double DsdeltaPhi = 0.;
+	double DsdeltaPt = 0.;
 
 //======================================================
 // MC Matching - D0 
 //======================================================
 
-	std::vector<double>* D0etaMatching = 0;
+	/*std::vector<double>* D0etaMatching = 0;
 	std::vector<double>* MCD0etaMatching = 0;
 	std::vector<double>* D0phiMatching = 0;
 	std::vector<double>* MCD0phiMatching = 0;
@@ -492,7 +497,7 @@ void analysisB2019_OfflineCuts()
 	std::vector<double>* D0KtMatching = 0;
 	std::vector<double>* D0SxyMatching = 0;
 	std::vector<double>* D0OpAngleMatching = 0;
-	std::vector<double>* deltaRD0Matching = 0;
+	std::vector<double>* deltaRD0Matching = 0;*/
 
 	double Variable_D0etaMatching = 0.;
 	double Variable_MCD0etaMatching = 0.;
@@ -504,6 +509,9 @@ void analysisB2019_OfflineCuts()
 	double Variable_D0SxyMatching = 0.;
 	double Variable_D0OpAngleMatching = 0.;
 	double Variable_deltaRD0Matching = 0.;
+	double D0deltaEta = 0.;
+	double D0deltaPhi = 0.;
+	double D0deltaPt = 0.;
 
 	string Variable_NameOfFiredTriggers; Variable_NameOfFiredTriggers.clear();
 	
@@ -524,6 +532,7 @@ void analysisB2019_OfflineCuts()
 	t_analysis.Branch("Anglephi",&Variable_Anglephi, "Variable_Anglephi/D");
 	t_analysis.Branch("D0fromDSsXY",&Variable_D0fromDSsXY, "Variable_D0fromDSsXY/D");
 	t_analysis.Branch("D0fromDSs3D",&Variable_D0fromDSs3D, "Variable_D0fromDSs3D/D");
+	t_analysis.Branch("Dslifetime",&Variable_Dslifetime, "Variable_Dslifetime/D");
 
 	t_analysis.Branch("TrkKpt",&Variable_TrkKpt, "Variable_TrkKpt/D");
 	t_analysis.Branch("Trkpipt",&Variable_Trkpipt, "Variable_Trkpipt/D");
@@ -567,7 +576,7 @@ void analysisB2019_OfflineCuts()
 	t_DstarWrongCombination.Branch("AnglephiWrong",&Variable_AnglephiWrong, "Variable_AnglephiWrong/D");
 	t_DstarWrongCombination.Branch("D0fromDSsXYWrong",&Variable_D0fromDSsXYWrong, "Variable_D0fromDSsXYWrong/D");
 	t_DstarWrongCombination.Branch("D0fromDSs3DWrong",&Variable_D0fromDSs3DWrong, "Variable_D0fromDSs3DWrong/D");
-	
+
 	//----------------------------------------
 	//For D0 
 	//-----------------------------------------
@@ -579,6 +588,7 @@ void analysisB2019_OfflineCuts()
 	t_D0analysis.Branch("D0Kpipt",&Variable_D0Kpipt, "Variable_D0Kpipt/D");
 	t_D0analysis.Branch("D0Kpieta",&Variable_D0Kpieta, "Variable_D0Kpieta/D");
 	t_D0analysis.Branch("D0Kpiphi",&Variable_D0Kpiphi, "Variable_D0Kpiphi/D");
+	t_D0analysis.Branch("D0lifetime",&Variable_D0lifetime, "Variable_D0lifetime/D");
 
 	t_D0analysis.Branch("TrkD0Kdxy",&Variable_TrkD0Kdxy, "Variable_TrkD0Kdxy/D");
 	t_D0analysis.Branch("TrkD0Kdz",&Variable_TrkD0Kdz, "Variable_TrkD0Kdz/D");
@@ -676,6 +686,9 @@ void analysisB2019_OfflineCuts()
 	t_DsMatching.Branch("MCDsptMatching",&Variable_MCDsptMatching, "Variable_MCDsptMatching/D");
 	t_DsMatching.Branch("D0fromDsmass",&Variable_D0fromDsmass, "Variable_D0fromDsmass/D");
 	t_DsMatching.Branch("deltaRDsMatching",&Variable_deltaRDsMatching, "Variable_deltaRDsMatching/D");
+	t_DsMatching.Branch("DsdeltaEta",&DsdeltaEta, "DsdeltaEta/D");
+	t_DsMatching.Branch("DsdeltaPhi",&DsdeltaPhi, "DsdeltaPhi/D"); 
+	t_DsMatching.Branch("DsdeltaPt",&DsdeltaPt, "DsdeltaPt/D");
 	
 	//----------------------------------------
 	//For D0 Matching
@@ -690,6 +703,10 @@ void analysisB2019_OfflineCuts()
 	t_D0Matching.Branch("D0SxyMatching",&Variable_D0SxyMatching, "Variable_D0SxyMatching/D");
 	t_D0Matching.Branch("D0OpAngleMatching",&Variable_D0OpAngleMatching, "Variable_D0OpAngleMatching/D");
 	t_D0Matching.Branch("deltaRD0Matching",&Variable_deltaRD0Matching, "Variable_deltaRD0Matching/D");
+	t_D0Matching.Branch("D0deltaEta",&D0deltaEta, "D0deltaEta/D");
+	t_D0Matching.Branch("D0deltaPhi",&D0deltaPhi, "D0deltaPhi/D"); 
+	t_D0Matching.Branch("D0deltaPt",&D0deltaPt, "D0deltaPt/D");
+
 
 
 	if (debug)cout << "debug 2 --------------------" << endl;
@@ -697,102 +714,119 @@ void analysisB2019_OfflineCuts()
 	//Creating Histgrams
 	//---------------------------------------------------
 	//TH1* makeTH1(const char* name, Double_t BIN, Double_t NMIN, Double_t NMAX, const char* TITLES, Color_t COLOR,const char* TYPE)
-	TH1 *D0massHisto = makeTH1("D0massHisto", 100, 1.76, 1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0massHisto = makeTH1("D0massHisto", 100, 1.76, 1.96, "Invariant Mass of the D0(From D*) ; Mass [GeV] ; Events ", kRed);
 	TH1 *DsmassHisto = makeTH1("DsmassHisto", 100,1.93,2.12, "Invariant Mass of the D* ; Mass [GeV] ; Events ", kRed);
-	TH1 *D0fromDSs3DHisto = makeTH1("D0fromDSs3DHisto", 100,0,5, "Significance of the D0 ; Significance ; Events ", kRed);
-	TH1 *TotalD0fromDSs3DHisto = makeTH1("TotalD0fromDSs3DHisto", 100,0,5, "Significance of the D0 ; Significance ; Events ", kRed);
-	TH1 *DsMinusD0Histo = makeTH1("DsMinusD0Histo", 100,0.14,0.16, "#Deltam = m(K#pi#pi_{slow}) - m(K#pi) ; #Delta m ; Events", kRed);
-	TH1 *D0VtxProbHisto = makeTH1("D0VtxProbHisto", 100,0,1, "D0VtxProbHisto ; Probability ; Events ", kRed);
+	TH1 *D0fromDSs3DHisto = makeTH1("D0fromDSs3DHisto", 100,0,5, "Significance of the D0(From D*) ; Significance ; Events ", kRed);
+	TH1 *TotalD0fromDSs3DHisto = makeTH1("TotalD0fromDSs3DHisto", 100,0,5, "Significance of the D0(From D*) ; Significance ; Events ", kRed);
+	TH1 *DsMinusD0Histo = makeTH1("DsMinusD0Histo", 100,0.14,0.16, "#Delta m = m(K#pi#pi_{slow}) - m(K#pi) ; #Delta m ; Events", kRed);
+	TH1 *D0VtxProbHisto = makeTH1("D0VtxProbHisto", 100,0,1, "D0(From D*) Vtx Prob ; Probability ; Events ", kRed);
+	TH1 *DslifetimeHisto = makeTH1("DslifetimeHisto", 100,0,(pow(10,-12)), " D* lifetime ; time [s] ; Events ", kRed);
 
-	TH1 *D0KpimassHisto = makeTH1("D0KpimassHisto", 100,1.76,1.96, "Invariant Mass of the D0(Prompt) ; Mass [GeV] ; Events ", kRed);
-	TH1 *D0Kpi_VtxProbHisto = makeTH1("D0Kpi_VtxProbHisto", 100,0,1, "D0Kpi_VtxProbHisto D0(Prompt) ; Probability ; Events ", kRed);
-	TH1 *D0Kpis3DHisto = makeTH1("D0Kpis3DHisto", 100,0,5, "Significance of the D0(Prompt) ; Significance ; Events ", kRed);
+	TH1 *DsmassHisto0 = makeTH1("DsmassHisto0", 100,1.93,2.12, "Invariant Mass of the D* ; Mass [GeV] ; Events ", kRed);
+	TH1 *DsmassHisto1 = makeTH1("DsmassHisto1", 100,1.93,2.12, "Invariant Mass of the D* ; Mass [GeV] ; Events ", kRed);
+	TH1 *DsmassHisto2 = makeTH1("DsmassHisto2", 100,1.93,2.12, "Invariant Mass of the D* ; Mass [GeV] ; Events ", kRed);
+	TH1 *DsmassHisto3 = makeTH1("DsmassHisto3", 100,1.93,2.12, "Invariant Mass of the D* ; Mass [GeV] ; Events ", kRed);
+	TH1 *DsmassHisto4 = makeTH1("DsmassHisto4", 100,1.93,2.12, "Invariant Mass of the D* ; Mass [GeV] ; Events ", kRed);
+	TH1 *DsmassHisto5 = makeTH1("DsmassHisto5", 100,1.93,2.12, "Invariant Mass of the D* ; Mass [GeV] ; Events ", kRed);
+	TH1 *DsmassHisto6 = makeTH1("DsmassHisto6", 100,1.93,2.12, "Invariant Mass of the D* ; Mass [GeV] ; Events ", kRed);
+	
+	TH1 *D0KpimassHisto = makeTH1("D0KpimassHisto", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0Kpi_VtxProbHisto = makeTH1("D0Kpi_VtxProbHisto", 100,0,1, "D0Kpi_VtxProbHisto D0 ; Probability ; Events ", kRed);
+	TH1 *TotalD0Kpis3DHistoHisto = makeTH1("TotalD0Kpis3DHistoHisto", 100,0,5, "Significance of the D0 ; Significance ; Events ", kRed);
+	TH1 *D0Kpis3DHisto = makeTH1("D0Kpis3DHisto", 100,0,6, "Significance of the D0 ; Significance ; Events ", kRed);
+	TH1 *D0lifetimeHisto = makeTH1("D0lifetimeHisto", 100,0,(pow(10,-12)), " D0 lifetime ; time [s] ; Events ", kRed);
+
+	TH1 *D0KpimassHisto0 = makeTH1("D0KpimassHisto0", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto1 = makeTH1("D0KpimassHisto1", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto2 = makeTH1("D0KpimassHisto2", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto3 = makeTH1("D0KpimassHisto3", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto4 = makeTH1("D0KpimassHisto4", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto5 = makeTH1("D0KpimassHisto5", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto6 = makeTH1("D0KpimassHisto6", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto7 = makeTH1("D0KpimassHisto7", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto8 = makeTH1("D0KpimassHisto8", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto9 = makeTH1("D0KpimassHisto9", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+	TH1 *D0KpimassHisto10 = makeTH1("D0KpimassHisto10", 100,1.76,1.96, "Invariant Mass of the D0 ; Mass [GeV] ; Events ", kRed);
+
 	//TH1 *D0KpiDispAngleHisto = makeTH1("D0KpiDispAngleHisto", 100,0,1, "Invariant Mass of the D0(Prompt) ; Mass [GeV] ; Events ", kRed);
 
-	TH1 *hRecEta_Rec1 = makeTH1("hRecEta_Rec1", 100,0,5, "hRecEta_Rec1 ; #eta ; Events ", kRed);
-	TH1 *hRecEta_MC1 = makeTH1("hRecEta_MC1", 100,0,5, "hRecEta_MC1 ; #eta ; Events ", kRed);
-	TH1 *hRecPhi_Rec1 = makeTH1("hRecPhi_Rec1", 100,0,5, "hRecPhi_Rec1 ; #phi ; Events ", kRed);
-	TH1 *hRecPhi_MC1 = makeTH1("hRecPhi_MC1", 100,0,5, "hRecPhi_MC1 ; #phi ; Events ", kRed);
-	TH1 *hRecPt_Rec1 = makeTH1("hRecPt_Rec1", 100,0,20, "hRecPt_Rec1 ; pT ; Events ", kRed);
-	TH1 *hRecPt_MC1 = makeTH1("hRecPt_MC1", 100,0,20, "hRecPt_MC1 ; pT ; Events ", kRed);
-
-	TH1 *hRecEta_Rec2 = makeTH1("hRecEta_Rec2", 100,0,5, "hRecEta_Rec2 ; #eta ; Events ", kRed);
-	TH1 *hRecEta_MC2 = makeTH1("hRecEta_MC2", 100,0,5, "hRecEta_MC2 ; #eta ; Events ", kRed);
-	TH1 *hRecPhi_Rec2 = makeTH1("hRecPhi_Rec2", 100,0,5, "hRecPhi_Rec2 ; #phi ; Events ", kRed);
-	TH1 *hRecPhi_MC2 = makeTH1("hRecPhi_MC2", 100,0,5, "hRecPhi_MC2 ; #phi ; Events ", kRed);
-	TH1 *hRecPt_Rec2 = makeTH1("hRecPt_Rec2", 100,0,20, "hRecPt_Rec2 ; pT ; Events ", kRed);
-	TH1 *hRecPt_MC2 = makeTH1("hRecPt_MC2", 100,0,20, "hRecPt_MC2 ; pT ; Events ", kRed);
-
-	TH1 *hRecEta_Rec3 = makeTH1("hRecEta_Rec3", 100,0,5, "hRecEta_Rec3 ; #eta ; Events ", kRed);
-	TH1 *hRecEta_MC3 = makeTH1("hRecEta_MC3", 100,0,5, "hRecEta_MC3 ; #eta ; Events ", kRed);
-	TH1 *hRecPhi_Rec3 = makeTH1("hRecPhi_Rec3", 100,0,5, "hRecPhi_Rec3 ; #phi ; Events ", kRed);
-	TH1 *hRecPhi_MC3 = makeTH1("hRecPhi_MC3", 100,0,5, "hRecPhi_MC3 ; #phi ; Events ", kRed);
-	TH1 *hRecPt_Rec3 = makeTH1("hRecPt_Rec3", 100,0,20, "hRecPt_Rec3 ; pT ; Events ", kRed);
-	TH1 *hRecPt_MC3 = makeTH1("hRecPt_MC3", 100,0,20, "hRecPt_MC3 ; pT ; Events ", kRed);
-
-	TH1 *hRecEta_Rec4 = makeTH1("hRecEta_Rec4", 100,0,5, "hRecEta_Rec4 ; #eta ; Events ", kRed);
-	TH1 *hRecEta_MC4 = makeTH1("hRecEta_MC4", 100,0,5, "hRecEta_MC4 ; #eta ; Events ", kRed);
-	TH1 *hRecPhi_Rec4 = makeTH1("hRecPhi_Rec4", 100,0,5, "hRecPhi_Rec4 ; #phi ; Events ", kRed);
-	TH1 *hRecPhi_MC4 = makeTH1("hRecPhi_MC4", 100,0,5, "hRecPhi_MC4 ; #phi ; Events ", kRed);
-	TH1 *hRecPt_Rec4 = makeTH1("hRecPt_Rec4", 100,0,20, "hRecPt_Rec4 ; pT ; Events ", kRed);
-	TH1 *hRecPt_MC4 = makeTH1("hRecPt_MC4", 100,0,20, "hRecPt_MC4 ; pT ; Events ", kRed);
-
-	TH1 *hRecEta_Rec5 = makeTH1("hRecEta_Rec5", 100,0,5, "hRecEta_Rec5 ; #eta ; Events ", kRed);
-	TH1 *hRecEta_MC5 = makeTH1("hRecEta_MC5", 100,0,5, "hRecEta_MC5 ; #eta ; Events ", kRed);
-	TH1 *hRecPhi_Rec5 = makeTH1("hRecPhi_Rec5", 100,0,5, "hRecPhi_Rec5 ; #phi ; Events ", kRed);
-	TH1 *hRecPhi_MC5 = makeTH1("hRecPhi_MC5", 100,0,5, "hRecPhi_MC5 ; #phi ; Events ", kRed);
-	TH1 *hRecPt_Rec5 = makeTH1("hRecPt_Rec5", 100,0,20, "hRecPt_Rec5 ; pT ; Events ", kRed);
-	TH1 *hRecPt_MC5 = makeTH1("hRecPt_MC5", 100,0,20, "hRecPt_MC5 ; pT ; Events ", kRed);
-
-	TH1 *hRecEta_Rec6 = makeTH1("hRecEta_Rec6", 100,0,5, "hRecEta_Rec6 ; #eta ; Events ", kRed);
-	TH1 *hRecEta_MC6 = makeTH1("hRecEta_MC6", 100,0,5, "hRecEta_MC6 ; #eta ; Events ", kRed);
-	TH1 *hRecPhi_Rec6 = makeTH1("hRecPhi_Rec6", 100,0,5, "hRecPhi_Rec6 ; #phi ; Events ", kRed);
-	TH1 *hRecPhi_MC6 = makeTH1("hRecPhi_MC6", 100,0,5, "hRecPhi_MC6 ; #phi ; Events ", kRed);
-	TH1 *hRecPt_Rec6 = makeTH1("hRecPt_Rec6", 100,0,20, "hRecPt_Rec6 ; pT ; Events ", kRed);
-	TH1 *hRecPt_MC6 = makeTH1("hRecPt_MC6", 100,0,20, "hRecPt_MC6 ; pT ; Events ", kRed);
-
-	//for D0
-	TH1 *hRecD0Eta_Rec1 = makeTH1("hRecD0Eta_Rec1", 100,0,5, "hRecD0Eta_Rec1 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Eta_MC1 = makeTH1("hRecD0Eta_MC1", 100,0,5, "hRecD0Eta_MC1 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Phi_Rec1 = makeTH1("hRecD0Phi_Rec1", 100,0,5, "hRecD0Phi_Rec1 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Phi_MC1 = makeTH1("hRecD0Phi_MC1", 100,0,5, "hRecD0Phi_MC1 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Pt_Rec1 = makeTH1("hRecD0Pt_Rec1", 100,0,20, "hRecD0Pt_Rec1 ; pT ; Events ", kRed);
-	TH1 *hRecD0Pt_MC1 = makeTH1("hRecD0Pt_MC1", 100,0,20, "hRecD0Pt_MC1 ; pT ; Events ", kRed);
-
-	TH1 *hRecD0Eta_Rec2 = makeTH1("hRecD0Eta_Rec2", 100,0,5, "hRecD0Eta_Rec2 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Eta_MC2 = makeTH1("hRecD0Eta_MC2", 100,0,5, "hRecD0Eta_MC2 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Phi_Rec2 = makeTH1("hRecD0Phi_Rec2", 100,0,5, "hRecD0Phi_Rec2 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Phi_MC2 = makeTH1("hRecD0Phi_MC2", 100,0,5, "hRecD0Phi_MC2 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Pt_Rec2 = makeTH1("hRecD0Pt_Rec2", 100,0,20, "hRecD0Pt_Rec2 ; pT ; Events ", kRed);
-	TH1 *hRecD0Pt_MC2 = makeTH1("hRecD0Pt_MC2", 100,0,20, "hRecD0Pt_MC2 ; pT ; Events ", kRed);
 	
-	TH1 *hRecD0Eta_Rec3 = makeTH1("hRecD0Eta_Rec3", 100,0,5, "hRecD0Eta_Rec3 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Eta_MC3 = makeTH1("hRecD0Eta_MC3", 100,0,5, "hRecD0Eta_MC3 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Phi_Rec3 = makeTH1("hRecD0Phi_Rec3", 100,0,5, "hRecD0Phi_Rec3 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Phi_MC3 = makeTH1("hRecD0Phi_MC3", 100,0,5, "hRecD0Phi_MC3 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Pt_Rec3 = makeTH1("hRecD0Pt_Rec3", 100,0,20, "hRecD0Pt_Rec3 ; pT ; Events ", kRed);
-	TH1 *hRecD0Pt_MC3 = makeTH1("hRecD0Pt_MC3", 100,0,20, "hRecD0Pt_MC3 ; pT ; Events ", kRed);
+	/*TH1 *hRecEta_MC = makeTH1("hRecEta_MC", 10,0,2.5, "hRecEta_MC ; #eta ; Events ", kRed);
+	TH1 *hRecPhi_MC = makeTH1("hRecPhi_MC", 10,0,5, "hRecPhi_MC ; #phi ; Events ", kRed);
+	//TH1 *hRecPt_MC = makeTH1("hRecPt_MC", 10,0,40, "hRecPt_MC ; pT [GeV] ; Events ", kRed);
+	
+	TH1 *hRecEta_Rec1 = makeTH1("hRecEta_Rec1", 10,0,2.5, "hRecEta_Rec1 ; #eta ; Events ", kRed);
+	TH1 *hRecPhi_Rec1 = makeTH1("hRecPhi_Rec1", 10,0,5, "hRecPhi_Rec1 ; #phi ; Events ", kRed);
+	TH1 *hRecPt_Rec1 = makeTH1("hRecPt_Rec1", 10,0,40, "hRecPt_Rec1 ; pT [GeV] ; Events ", kRed);
 
-	TH1 *hRecD0Eta_Rec4 = makeTH1("hRecD0Eta_Rec4", 100,0,5, "hRecD0Eta_Rec4 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Eta_MC4 = makeTH1("hRecD0Eta_MC4", 100,0,5, "hRecD0Eta_MC4 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Phi_Rec4 = makeTH1("hRecD0Phi_Rec4", 100,0,5, "hRecD0Phi_Rec4 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Phi_MC4 = makeTH1("hRecD0Phi_MC4", 100,0,5, "hRecD0Phi_MC4 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Pt_Rec4 = makeTH1("hRecD0Pt_Rec4", 100,0,20, "hRecD0Pt_Rec4 ; pT ; Events ", kRed);
-	TH1 *hRecD0Pt_MC4 = makeTH1("hRecD0Pt_MC4", 100,0,20, "hRecD0Pt_MC4 ; pT ; Events ", kRed);
+	TH1 *hRecEta_Rec2 = makeTH1("hRecEta_Rec2", 10,0,2.5, "hRecEta_Rec2 ; #eta ; Events ", kRed);
+	TH1 *hRecPhi_Rec2 = makeTH1("hRecPhi_Rec2", 10,0,5, "hRecPhi_Rec2 ; #phi ; Events ", kRed);
+	TH1 *hRecPt_Rec2 = makeTH1("hRecPt_Rec2", 10,0,40, "hRecPt_Rec2 ; pT [GeV] ; Events ", kRed);
 
-	TH1 *hRecD0Eta_Rec5 = makeTH1("hRecD0Eta_Rec5", 100,0,5, "hRecD0Eta_Rec5 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Eta_MC5 = makeTH1("hRecD0Eta_MC5", 100,0,5, "hRecD0Eta_MC5 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Phi_Rec5 = makeTH1("hRecD0Phi_Rec5", 100,0,5, "hRecD0Phi_Rec5 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Phi_MC5 = makeTH1("hRecD0Phi_MC5", 100,0,5, "hRecD0Phi_MC5 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Pt_Rec5 = makeTH1("hRecD0Pt_Rec5", 100,0,20, "hRecD0Pt_Rec5 ; pT ; Events ", kRed);
-	TH1 *hRecD0Pt_MC5 = makeTH1("hRecD0Pt_MC5", 100,0,20, "hRecD0Pt_MC5 ; pT ; Events ", kRed);
+	TH1 *hRecEta_Rec3 = makeTH1("hRecEta_Rec3", 10,0,2.5, "hRecEta_Rec3 ; #eta ; Events ", kRed);
+	TH1 *hRecPhi_Rec3 = makeTH1("hRecPhi_Rec3", 10,0,5, "hRecPhi_Rec3 ; #phi ; Events ", kRed);
+	TH1 *hRecPt_Rec3 = makeTH1("hRecPt_Rec3", 10,0,40, "hRecPt_Rec3 ; pT [GeV] ; Events ", kRed);
 
-	TH1 *hRecD0Eta_Rec6 = makeTH1("hRecD0Eta_Rec6", 100,0,5, "hRecD0Eta_Rec6 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Eta_MC6 = makeTH1("hRecD0Eta_MC6", 100,0,5, "hRecD0Eta_MC6 ; #eta ; Events ", kRed);
-	TH1 *hRecD0Phi_Rec6 = makeTH1("hRecD0Phi_Rec6", 100,0,5, "hRecD0Phi_Rec6 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Phi_MC6 = makeTH1("hRecD0Phi_MC6", 100,0,5, "hRecD0Phi_MC6 ; #phi ; Events ", kRed);
-	TH1 *hRecD0Pt_Rec6 = makeTH1("hRecD0Pt_Rec6", 100,0,20, "hRecD0Pt_Rec6 ; pT ; Events ", kRed);
-	TH1 *hRecD0Pt_MC6 = makeTH1("hRecD0Pt_MC6", 100,0,20, "hRecD0Pt_MC6 ; pT ; Events ", kRed);
+	TH1 *hRecEta_Rec4 = makeTH1("hRecEta_Rec4", 10,0,2.5, "hRecEta_Rec4 ; #eta ; Events ", kRed);
+	TH1 *hRecPhi_Rec4 = makeTH1("hRecPhi_Rec4", 10,0,5, "hRecPhi_Rec4 ; #phi ; Events ", kRed);
+	TH1 *hRecPt_Rec4 = makeTH1("hRecPt_Rec4", 10,0,40, "hRecPt_Rec4 ; pT [GeV]; Events ", kRed);*/
+
+	const int nbinsPt_left = 9;
+	double binsPt_left[nbinsPt_left+1] = {4., 5., 6., 7., 8., 12., 16., 24., 40., 100.};
+
+	const int nbinsEta_left = 10;
+	double binsEta_left[nbinsEta_left+1] = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.1};
+
+	TH1 *hRecEta_MC = makeTH1Rec("hRecEta_MC", nbinsEta_left, binsEta_left );
+	TH1 *hRecPt_MC = makeTH1Rec("hRecPt_MC", nbinsPt_left, binsPt_left );
+
+	TH1 *hRecEta_Rec1 = makeTH1Rec("hRecEta_Rec1", nbinsEta_left, binsEta_left );
+	TH1 *hRecPt_Rec1 = makeTH1Rec("hRecPt_Rec1", nbinsPt_left, binsPt_left );
+
+	TH1 *hRecEta_Rec2 = makeTH1Rec("hRecEta_Rec2", nbinsEta_left, binsEta_left );
+	TH1 *hRecPt_Rec2 = makeTH1Rec("hRecPt_Rec2", nbinsPt_left, binsPt_left );
+
+	TH1 *hRecEta_Rec3 = makeTH1Rec("hRecEta_Rec3", nbinsEta_left, binsEta_left );
+	TH1 *hRecPt_Rec3 = makeTH1Rec("hRecPt_Rec3", nbinsPt_left, binsPt_left );
+
+	TH1 *hRecEta_Rec4 = makeTH1Rec("hRecEta_Rec4", nbinsEta_left, binsEta_left );
+	TH1 *hRecPt_Rec4 = makeTH1Rec("hRecPt_Rec4", nbinsPt_left, binsPt_left );
+	
+	//for D0
+	/*TH1 *hRecD0Eta_MC = makeTH1("hRecD0Eta_MC", 10,0,2.5, "hRecD0Eta_MC ; #eta ; Events ", kRed);
+	TH1 *hRecD0Phi_MC = makeTH1("hRecD0Phi_MC", 10,0,5, "hRecD0Phi_MC ; #phi ; Events ", kRed);
+	TH1 *hRecD0Pt_MC = makeTH1("hRecD0Pt_MC", 10,0,40, "hRecD0Pt_MC ; pT [GeV] ; Events ", kRed);
+
+	TH1 *hRecD0Eta_Rec1 = makeTH1("hRecD0Eta_Rec1", 10,0,2.5, "hRecD0Eta_Rec1 ; #eta ; Events ", kRed);
+	TH1 *hRecD0Phi_Rec1 = makeTH1("hRecD0Phi_Rec1", 10,0,5, "hRecD0Phi_Rec1 ; #phi ; Events ", kRed);
+	TH1 *hRecD0Pt_Rec1 = makeTH1("hRecD0Pt_Rec1", 10,0,40, "hRecD0Pt_Rec1 ; pT [GeV] ; Events ", kRed);
+	
+	TH1 *hRecD0Eta_Rec2 = makeTH1("hRecD0Eta_Rec2", 10,0,2.5, "hRecD0Eta_Rec2 ; #eta ; Events ", kRed);
+	TH1 *hRecD0Phi_Rec2 = makeTH1("hRecD0Phi_Rec2", 10,0,5, "hRecD0Phi_Rec2 ; #phi ; Events ", kRed);
+	TH1 *hRecD0Pt_Rec2 = makeTH1("hRecD0Pt_Rec2", 10,0,40, "hRecD0Pt_Rec2 ; pT [GeV] ; Events ", kRed);
+	
+	TH1 *hRecD0Eta_Rec3 = makeTH1("hRecD0Eta_Rec3", 10,0,2.5, "hRecD0Eta_Rec3 ; #eta ; Events ", kRed);
+	TH1 *hRecD0Phi_Rec3 = makeTH1("hRecD0Phi_Rec3", 10,0,5, "hRecD0Phi_Rec3 ; #phi ; Events ", kRed);
+	TH1 *hRecD0Pt_Rec3 = makeTH1("hRecD0Pt_Rec3", 10,0,40, "hRecD0Pt_Rec3 ; pT [GeV] ; Events ", kRed);
+
+	TH1 *hRecD0Eta_Rec4 = makeTH1("hRecD0Eta_Rec4", 10,0,2.5, "hRecD0Eta_Rec4 ; #eta ; Events ", kRed);
+	TH1 *hRecD0Phi_Rec4 = makeTH1("hRecD0Phi_Rec4", 10,0,5, "hRecD0Phi_Rec4 ; #phi ; Events ", kRed);
+	TH1 *hRecD0Pt_Rec4 = makeTH1("hRecD0Pt_Rec4", 10,0,40, "hRecD0Pt_Rec4 ; pT [GeV] ; Events ", kRed);*/
+
+	TH1 *hRecD0Eta_MC = makeTH1Rec("hRecD0Eta_MC", nbinsEta_left, binsEta_left );
+	TH1 *hRecD0Pt_MC = makeTH1Rec("hRecD0Pt_MC", nbinsPt_left, binsPt_left );
+
+	TH1 *hRecD0Eta_Rec1 = makeTH1Rec("hRecD0Eta_Rec1", nbinsEta_left, binsEta_left );
+	TH1 *hRecD0Pt_Rec1 = makeTH1Rec("hRecD0Pt_Rec1", nbinsPt_left, binsPt_left );
+
+	TH1 *hRecD0Eta_Rec2 = makeTH1Rec("hRecD0Eta_Rec2", nbinsEta_left, binsEta_left );
+	TH1 *hRecD0Pt_Rec2 = makeTH1Rec("hRecD0Pt_Rec2", nbinsPt_left, binsPt_left );
+
+	TH1 *hRecD0Eta_Rec3 = makeTH1Rec("hRecD0Eta_Rec3", nbinsEta_left, binsEta_left );
+	TH1 *hRecD0Pt_Rec3 = makeTH1Rec("hRecD0Pt_Rec3", nbinsPt_left, binsPt_left );
+
+	TH1 *hRecD0Eta_Rec4 = makeTH1Rec("hRecD0Eta_Rec4", nbinsEta_left, binsEta_left );
+	TH1 *hRecD0Pt_Rec4 = makeTH1Rec("hRecD0Pt_Rec4", nbinsPt_left, binsPt_left );
 
 	if (debug) cout << "debug 3 --------------------"<< endl;
 	
@@ -800,6 +834,7 @@ void analysisB2019_OfflineCuts()
 	//ADDRESSING THE MEMORY TO VECTOR AND VARIABLES
 	//--------------------------------------------------
 	TBranch *b_NameOfFiredTriggers; t1->SetBranchAddress("NameOfFiredTriggers",&NameOfFiredTriggers,&b_NameOfFiredTriggers);
+	TBranch *b_PUWeight; t1->SetBranchAddress("PUWeight",&PUWeight,&b_PUWeight);
 	//For D* 
 	//-----------------------------------------
 	//TBranch *b_D0mass = t1->GetBranch("D0mass");b_D0mass->SetAddress(&D0mass);
@@ -816,6 +851,7 @@ void analysisB2019_OfflineCuts()
 	TBranch *b_Anglephi ; t1->SetBranchAddress("Anglephi",&Anglephi,&b_Anglephi);
 	TBranch *b_D0fromDSsXY ; t1->SetBranchAddress("D0fromDSsXY",&D0fromDSsXY,&b_D0fromDSsXY);
 	TBranch *b_D0fromDSs3D ; t1->SetBranchAddress("D0fromDSs3D",&D0fromDSs3D,&b_D0fromDSs3D);
+	TBranch *b_D0fromDSd3D ; t1->SetBranchAddress("D0fromDSd3D",&D0fromDSd3D,&b_D0fromDSd3D);
 	TBranch *b_D0_VtxProb ; t1->SetBranchAddress("D0_VtxProb",&D0_VtxProb,&b_D0_VtxProb);
 
 	TBranch *b_TrkSpt ; t1->SetBranchAddress("TrkSpt",&TrkSpt,&b_TrkSpt);
@@ -956,43 +992,8 @@ void analysisB2019_OfflineCuts()
 	TBranch *b_MCpromptD0_Pimass ; t1->SetBranchAddress("MCpromptD0_Pimass",&MCpromptD0_Pimass,&b_MCpromptD0_Pimass);
 	TBranch *b_MCpromptD0_DispAngle ; t1->SetBranchAddress("MCpromptD0_DispAngle",&MCpromptD0_DispAngle,&b_MCpromptD0_DispAngle);
 
-	//----------------------------------------
-	//FOR D* Matching
-	//-----------------------------------------
-	TBranch *b_DsetaMatching ; t1->SetBranchAddress("DsetaMatching",&DsetaMatching,&b_DsetaMatching);
-	TBranch *b_MCDsetaMatching ; t1->SetBranchAddress("MCDsetaMatching",&MCDsetaMatching,&b_MCDsetaMatching);
-	TBranch *b_DsphiMatching ; t1->SetBranchAddress("DsphiMatching",&DsphiMatching,&b_DsphiMatching);
-	TBranch *b_MCDsphiMatching ; t1->SetBranchAddress("MCDsphiMatching",&MCDsphiMatching,&b_MCDsphiMatching);
-	TBranch *b_DsptMatching ; t1->SetBranchAddress("DsptMatching",&DsptMatching,&b_DsptMatching);
-	TBranch *b_MCDsptMatching ; t1->SetBranchAddress("MCDsptMatching",&MCDsptMatching,&b_MCDsptMatching);
-	TBranch *b_D0fromDsmass ; t1->SetBranchAddress("D0fromDsmass",&D0fromDsmass,&b_D0fromDsmass);
-	
-	TBranch *b_deltaRDsMatching ; t1->SetBranchAddress("deltaRDsMatching",&deltaRDsMatching,&b_deltaRDsMatching);
-
-	//----------------------------------------
-	//FOR D0 Matching
-	//-----------------------------------------
-	TBranch *b_D0etaMatching ; t1->SetBranchAddress("D0etaMatching",&D0etaMatching,&b_D0etaMatching);
-	TBranch *b_MCD0etaMatching ; t1->SetBranchAddress("MCD0etaMatching",&MCD0etaMatching,&b_MCD0etaMatching);
-	TBranch *b_D0phiMatching ; t1->SetBranchAddress("D0phiMatching",&D0phiMatching,&b_D0phiMatching);
-	TBranch *b_MCD0phiMatching ; t1->SetBranchAddress("MCD0phiMatching",&MCD0phiMatching,&b_MCD0phiMatching);
-	TBranch *b_D0ptMatching ; t1->SetBranchAddress("D0ptMatching",&D0ptMatching,&b_D0ptMatching);
-	TBranch *b_MCD0ptMatching ; t1->SetBranchAddress("MCD0ptMatching",&MCD0ptMatching,&b_MCD0ptMatching);
-	TBranch *b_D0KtMatching ; t1->SetBranchAddress("D0KtMatching",&D0KtMatching,&b_D0KtMatching);
-	TBranch *b_D0SxyMatching ; t1->SetBranchAddress("D0SxyMatching",&D0SxyMatching,&b_D0SxyMatching);
-	TBranch *b_D0OpAngleMatching ; t1->SetBranchAddress("D0OpAngleMatching",&D0OpAngleMatching,&b_D0OpAngleMatching);
-	TBranch *b_deltaRD0Matching ; t1->SetBranchAddress("deltaRD0Matching",&deltaRD0Matching,&b_deltaRD0Matching);
-
-	
-	
 	//TBranch *b_teste = t1->GetBranch("teste");b_teste->SetAddress(&teste);	
 	if (debug)cout << "debug 5 --------------------"<< endl;
-
-	//**********************************************************		
-	//Reading Number of tree entries of the file
-	Long64_t nentries = t1->GetEntries();
-	cout<< "Number of tree entries: "<< nentries <<std::endl;
-	//Long64_t GetEntriesFast = t1->GetEntriesFast();
 
 	for (Long64_t jentry=0; jentry < nentries; jentry++) //loop tree entries for file f1
 	{
@@ -1000,10 +1001,12 @@ void analysisB2019_OfflineCuts()
 		Long64_t ientry = t1->LoadTree(jentry);
       //std::cout << "nentries " << nentries << " ientry " << ientry << " jentry " << jentry <<std::endl;
       if (ientry < 0) break;
-		
+
+		NumberOfEvents++;
+
 		//Output about percent program executed
-		double percent = (jentry*100)/nentries;
-		if (jentry % 10000 == 0) cout <<"*****"<< percent << "per cent done***" << endl;
+		double percent = (jentry*100)/nentries;		
+		if ( jentry % partpercent == 0) cout <<"*****"<< percent << "per cent done***" << endl;
 		//cout <<"*****entrada"<< jentry << "***" << endl;
 		
 		//----------------------------------------
@@ -1019,10 +1022,14 @@ void analysisB2019_OfflineCuts()
 		//for(unsigned int tescont=0; tescont < NameOfFiredTriggers->size(); tescont++)
 		//{  string teststring = NameOfFiredTriggers->at(tescont);
 		//	std::cout << "NameOfFiredTriggers ["<< tescont <<"]: " << teststring  << std::endl;}
-		
+
+		b_PUWeight->GetEntry(ientry);
+
+		EventsAfterTrigger++;
 		//----------------------------------------
 		//For D* 
 		//-----------------------------------------
+		if ( FlagDs){
 		b_D0mass->GetEntry(ientry);
 		b_D0eta->GetEntry(ientry);
 		b_D0phi->GetEntry(ientry);
@@ -1033,7 +1040,8 @@ void analysisB2019_OfflineCuts()
 		b_Dspt->GetEntry(ientry);
 		b_Anglephi->GetEntry(ientry);
 		b_D0fromDSsXY->GetEntry(ientry);
-		b_D0fromDSs3D->GetEntry(ientry);
+		b_D0fromDSs3D->GetEntry(ientry); 
+		b_D0fromDSd3D->GetEntry(ientry);
 		b_D0_VtxProb->GetEntry(ientry);
 		b_DSDeltaR->GetEntry(ientry);
 
@@ -1060,9 +1068,11 @@ void analysisB2019_OfflineCuts()
 		b_Trkpidz->GetEntry(ientry);
 		b_Trkpieta->GetEntry(ientry);
 		b_Trkpiphi->GetEntry(ientry);
+		}
 		//----------------------------------------
 		//For D* Wrong combination
 		//-----------------------------------------
+		if( FlagDsWrong ){
 		b_D0massWrong->GetEntry(ientry);
 		b_D0etaWrong->GetEntry(ientry);
 		b_D0phiWrong->GetEntry(ientry);
@@ -1075,10 +1085,11 @@ void analysisB2019_OfflineCuts()
 		b_D0fromDSsXYWrong->GetEntry(ientry);
 		b_D0fromDSs3DWrong->GetEntry(ientry);
 		b_D0_VtxProbWrong->GetEntry(ientry);
-
+		}
 		//----------------------------------------
 		//For D0 
 		//-----------------------------------------
+		if ( FlagD0){
 		b_D0Kpimass->GetEntry(ientry);
 		b_D0Kpi_VtxProb->GetEntry(ientry);
 		b_D0Kpis3D->GetEntry(ientry);
@@ -1108,10 +1119,11 @@ void analysisB2019_OfflineCuts()
 		b_D0Kpid3D->GetEntry(ientry);
 		b_D0Kpie3D->GetEntry(ientry);
 		b_D0_kT->GetEntry(ientry);
-
+		}
 		//----------------------------------------
 		//For D* MC
 		//-----------------------------------------
+		if( FlagDsMC){
 		b_dScandsKpi->GetEntry(ientry);
 		b_MCDseta->GetEntry(ientry);
 		b_MCDsphi->GetEntry(ientry);
@@ -1144,10 +1156,11 @@ void analysisB2019_OfflineCuts()
 		b_MCDsPiet->GetEntry(ientry);
 		b_MCDsPirapidity->GetEntry(ientry);
 		b_MCDsPimass->GetEntry(ientry);
-	
+		}
 		//----------------------------------------
 		//For D0 MC
 		//-----------------------------------------
+		if( FlagD0MC){
 		b_MCpromptD0eta->GetEntry(ientry);
 		b_MCpromptD0phi->GetEntry(ientry);
 		b_MCpromptD0pt->GetEntry(ientry);
@@ -1173,65 +1186,49 @@ void analysisB2019_OfflineCuts()
 		b_MCpromptD0_Pirapidity->GetEntry(ientry);
 		b_MCpromptD0_Pimass->GetEntry(ientry);
 		b_MCpromptD0_DispAngle->GetEntry(ientry);
-		
-		//----------------------------------------
-		//For D* Matching 
-		//-----------------------------------------
-		b_DsetaMatching->GetEntry(ientry);
-		b_MCDsetaMatching->GetEntry(ientry);
-		b_DsphiMatching->GetEntry(ientry);
-		b_MCDsphiMatching->GetEntry(ientry);
-		b_DsptMatching->GetEntry(ientry);
-		b_MCDsptMatching->GetEntry(ientry); 
-		b_D0fromDsmass->GetEntry(ientry);
-		b_deltaRDsMatching->GetEntry(ientry);
-
-		//----------------------------------------
-		//For D0 Matching
-		//-----------------------------------------
-		b_D0etaMatching->GetEntry(ientry);
-		b_MCD0etaMatching->GetEntry(ientry);
-		b_D0phiMatching->GetEntry(ientry);
-		b_MCD0phiMatching->GetEntry(ientry);
-		b_D0ptMatching->GetEntry(ientry);
-		b_MCD0ptMatching->GetEntry(ientry);
-		b_D0KtMatching->GetEntry(ientry);
-		b_D0SxyMatching->GetEntry(ientry);
-		b_D0OpAngleMatching->GetEntry(ientry);
-		b_deltaRD0Matching->GetEntry(ientry);
+		}
 
 		if (debug)cout << "debug 10 --------------------"<< endl;
 	
 		//----------------------------------------
 		//For D* and D0(from D*)
-		//-----------------------------------------	
+		//-----------------------------------------
+		if ( (D0mass->size() > 0) && FlagDs){
 		for(unsigned int i=0; i < D0mass->size(); i++)
-		{  if (debug)cout << "debug D* 11 --------------------"<< endl;
-							
-			if( D0_VtxProb->at(i) < 0.01) continue;
-			TotalD0fromDSs3DHisto->Fill(D0fromDSs3D->at(i));
-			if( D0fromDSs3D->at(i) < SigCutD0fromDs) continue;
-			if( Anglephi->at(i) < 0.99 ) continue;
-			if ( D0pt->at(i) < 3. ) continue;
-			if( (Dsmass->at(i) - D0mass->at(i)) > 0.16) continue;
-						
+		{  
+			PossibleDs++;					
+			if( D0_VtxProb->at(i) < 0.01) continue; DsD0ProbVtx++;		
+			if( Anglephi->at(i) < 0.99 ) continue; DsD0Angle++;	
+			if( fabs(D0mass->at(i) - 1.86484) > 0.1 ) continue; D0fromDsMinusPDG++;
+			if ( D0pt->at(i) < 3. ) continue; DsD0pt++;
+			if( (Dsmass->at(i) - D0mass->at(i)) > 0.16) continue; DsD0deltaM++;
+			DsmassHisto0->Fill(Dsmass->at(i));
+			if( D0fromDSs3D->at(i)>0.5) { DsmassHisto1->Fill(Dsmass->at(i));}
+			if( D0fromDSs3D->at(i)>1.0) { DsmassHisto2->Fill(Dsmass->at(i));}
+			if( D0fromDSs3D->at(i)>1.5) { DsmassHisto3->Fill(Dsmass->at(i));}
+			if( D0fromDSs3D->at(i)>2.0) { DsmassHisto4->Fill(Dsmass->at(i));}
+			if( D0fromDSs3D->at(i)>2.5) { DsmassHisto5->Fill(Dsmass->at(i));}
+			if( D0fromDSs3D->at(i)>3.0) { DsmassHisto6->Fill(Dsmass->at(i));}
+			if( D0fromDSs3D->at(i) < SigCutD0fromDs) continue; DsD0Sig++;
+			
 			D0massHisto->Fill(D0mass->at(i));
 			DsmassHisto->Fill(Dsmass->at(i));
 			DsMinusD0Histo->Fill((Dsmass->at(i) - D0mass->at(i)));
 			D0fromDSs3DHisto->Fill(D0fromDSs3D->at(i));
 			D0VtxProbHisto->Fill(D0_VtxProb->at(i));
+			DslifetimeHisto->Fill( (Dsmass->at(i)*D0fromDSd3D->at(i)*pow(10,-2)) / (c*Dspt->at(i)) );
 
 			Variable_DsMinusD0 = (Dsmass->at(i) - D0mass->at(i));
-	
 			Variable_D0mass = D0mass->at(i);
-			Variable_Dsmass = Dsmass->at(i);
 			Variable_D0eta = D0eta->at(i);
 			Variable_D0phi = D0phi->at(i);
+			Variable_D0pt = D0pt->at(i);
+			Variable_Dsmass = Dsmass->at(i);
 			Variable_Dseta = Dseta->at(i);
 			Variable_Dsphi = Dsphi->at(i);
-			Variable_TrkKpt = TrkKpt->at(i);
-			Variable_D0pt = D0pt->at(i);
 			Variable_Dspt = Dspt->at(i);
+			Variable_Dslifetime = (Dsmass->at(i)*D0fromDSd3D->at(i)*pow(10,-2))/(c*Dspt->at(i));
+			Variable_TrkKpt = TrkKpt->at(i);		
 			Variable_Trkpipt = Trkpipt->at(i);
 			Variable_TrkSpt = TrkSpt->at(i);
 			Variable_DSDeltaR = DSDeltaR->at(i);
@@ -1258,95 +1255,114 @@ void analysisB2019_OfflineCuts()
 			Variable_D0fromDSs3D = D0fromDSs3D->at(i);
 			Variable_Anglephi = Anglephi->at(i);
 			Variable_D0_VtxProb = D0_VtxProb->at(i);
-
+			
 			t_analysis.Fill();
 
 			if (debug)cout << "debug D* 12 --------------------"<< endl;
   		}
-	
+		}
 		//----------------------------------------
 		//For D* Wrong Combination
-		//-----------------------------------------	
-		for(unsigned int k=0; k < D0massWrong->size(); k++)
-		{ 				
-			if( D0_VtxProbWrong->at(k) < 0.01) continue;
-			if( D0fromDSs3DWrong->at(k) < SigCutD0fromDs) continue;
-			if( AnglephiWrong->at(k) < 0.99 ) continue;
-			if ( D0ptWrong->at(k) < 3. ) continue;
-			if( (DsmassWrong->at(k) - D0massWrong->at(k)) > 0.16) continue;
-						
-			Variable_DsMinusD0 = (DsmassWrong->at(k) - D0massWrong->at(k));
-			Variable_D0massWrong = D0massWrong->at(k);
-			Variable_DsmassWrong = DsmassWrong->at(k);
-			Variable_D0etaWrong = D0etaWrong->at(k);
-			Variable_D0phiWrong = D0phiWrong->at(k);
-			Variable_DsetaWrong = DsetaWrong->at(k);
-			Variable_DsphiWrong = DsphiWrong->at(k);
-			Variable_D0ptWrong = D0ptWrong->at(k);
-			Variable_DsptWrong = DsptWrong->at(k);
+		//-----------------------------------------
+		if( (D0massWrong->size() > 0) && FlagDsWrong){
+		for(unsigned int i=0; i < D0massWrong->size(); i++)
+		{ 	if (debug)cout << "debug D* 13 --------------------"<< endl; 			
+			if( D0_VtxProbWrong->at(i) < 0.01) continue;
+			if( AnglephiWrong->at(i) < 0.99 ) continue;
+			if( fabs(D0massWrong->at(i) - 1.86484) > 0.1 ) continue;
+			if ( D0ptWrong->at(i) < 3. ) continue;
+			if( (DsmassWrong->at(i) - D0massWrong->at(i)) > 0.16) continue;
+			if( D0fromDSs3DWrong->at(i) < SigCutD0fromDs) continue;
+					
+			Variable_DsMinusD0 = (DsmassWrong->at(i) - D0massWrong->at(i));
+			Variable_D0massWrong = D0massWrong->at(i);
+			Variable_DsmassWrong = DsmassWrong->at(i);
+			Variable_D0etaWrong = D0etaWrong->at(i);
+			Variable_D0phiWrong = D0phiWrong->at(i);
+			Variable_DsetaWrong = DsetaWrong->at(i);
+			Variable_DsphiWrong = DsphiWrong->at(i);
+			Variable_D0ptWrong = D0ptWrong->at(i);
+			Variable_DsptWrong = DsptWrong->at(i);
 
-			t_DstarWrongCombination.Fill();	
+			t_DstarWrongCombination.Fill();
+			if (debug)cout << "debug D* 14 --------------------"<< endl;
   		}//For D* Wrong Combination
-
+		}
 		//----------------------------------------
-		//For D0(Direct)
-		//-----------------------------------------	
-		for(unsigned int j=0; j < D0Kpimass->size(); j++)
-		{  if (debug)cout << "debug D0(Direct) 11 --------------------"<< endl;
-							
-			if( D0Kpi_VtxProb->at(j) < 0.01) continue;
-			if (debug)cout << "debug D0(Direct) 12 --------------------"<< endl;
-			if( D0Kpis3D->at(j) < SigCutD0) continue;
-			if (debug)cout << "debug D0(Direct) 13 --------------------"<< endl;
-			if( D0KpiDispAngle->at(j) < 0.99 ) continue;
-			if (debug)cout << "debug D0(Direct) 14 --------------------"<< endl;
-			//if ( D0Kpipt->at(i) < 3. ) continue;	
-		
-			D0KpimassHisto->Fill(D0Kpimass->at(j));
-			D0Kpis3DHisto->Fill(D0Kpis3D->at(j));
-			D0Kpi_VtxProbHisto->Fill(D0Kpi_VtxProb->at(j));
-
-			Variable_D0Kpimass = D0Kpimass->at(j);
-			Variable_D0Kpi_VtxProb = D0Kpi_VtxProb->at(j);
-			Variable_D0Kpis3D = D0Kpis3D->at(j);
-			Variable_D0KpiDispAngle = D0KpiDispAngle->at(j);
-
-			Variable_D0Kpipt = D0Kpipt->at(j);
-			Variable_D0Kpieta = D0Kpieta->at(j);
-			Variable_D0Kpis3D = D0Kpis3D->at(j);
-			Variable_D0Kpiphi = D0Kpiphi->at(j);
-
-			Variable_TrkD0Kdxy = TrkD0Kdxy->at(j);
-			Variable_TrkD0Kdz = TrkD0Kdz->at(j);
-			Variable_TrkD0Kchi2 = TrkD0Kchi2->at(j);
-			Variable_TrkD0Kpt = TrkD0Kpt->at(j);
-			Variable_TrkD0Keta = TrkD0Keta->at(j);
-			Variable_TrkD0kphi = TrkD0kphi->at(j);
-			Variable_TrkD0Knhits = TrkD0Knhits->at(j);
-
-			Variable_TrkD0pidxy = TrkD0pidxy->at(j);
-			Variable_TrkD0pidz = TrkD0pidz->at(j);
-			Variable_TrkD0pichi2 = TrkD0pichi2->at(j);
-			Variable_TrkD0pieta = TrkD0pieta->at(j);
-			Variable_TrkD0piphi = TrkD0piphi->at(j);
-			Variable_TrkD0pinhits = TrkD0pinhits->at(j);
-
-			Variable_D0KpisXY = D0KpisXY->at(j);
-			Variable_D0Kpid3D = D0Kpid3D->at(j);
-			Variable_D0Kpie3D = D0Kpie3D->at(j);
-			Variable_D0_kT = D0_kT->at(j);
+		//For D0
+		//-----------------------------------------
+		if (D0Kpimass->size() > 0 && FlagD0){
+		for(unsigned int i=0; i < D0Kpimass->size(); i++)
+		{  if (debug)cout << "debug D* 15 --------------------"<< endl;
+			PossibleD0++;
+			if( D0Kpi_VtxProb->at(i) < 0.01) continue; D0ProbVtx++;	
+			if( D0KpiDispAngle->at(i) < 0.99 ) continue; D0Angle++;
+			TotalD0Kpis3DHistoHisto->Fill(D0Kpis3D->at(i));
+			if( abs(D0Kpimass->at(i)-1.86484) > 0.1) continue;	CountD0minusPDG++;		
+			if( D0Kpipt->at(i) < 2. ) continue; CountD0pt++;
+			D0KpimassHisto0->Fill(D0Kpimass->at(i));
+			if( D0Kpis3D->at(i)>0.5) { D0KpimassHisto1->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>1.0) { D0KpimassHisto2->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>1.5) { D0KpimassHisto3->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>2.0) { D0KpimassHisto4->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>2.5) { D0KpimassHisto5->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>3.0) { D0KpimassHisto6->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>3.5) { D0KpimassHisto7->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>4.0) { D0KpimassHisto8->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>4.5) { D0KpimassHisto9->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i)>5.0) { D0KpimassHisto10->Fill(D0Kpimass->at(i));}
+			if( D0Kpis3D->at(i) < SigCutD0) continue; D0Sig++;
 			
-		
+			D0KpimassHisto->Fill(D0Kpimass->at(i));
+			D0Kpis3DHisto->Fill(D0Kpis3D->at(i));
+			D0Kpi_VtxProbHisto->Fill(D0Kpi_VtxProb->at(i));
+			D0lifetimeHisto->Fill((D0Kpimass->at(i)*D0Kpid3D->at(i)*pow(10,-2))/(c*D0Kpipt->at(i)));
+
+			Variable_D0Kpimass = D0Kpimass->at(i);
+			Variable_D0Kpi_VtxProb = D0Kpi_VtxProb->at(i);
+			Variable_D0Kpis3D = D0Kpis3D->at(i);
+			Variable_D0KpiDispAngle = D0KpiDispAngle->at(i);
+
+			Variable_D0Kpipt = D0Kpipt->at(i);
+			Variable_D0Kpieta = D0Kpieta->at(i);
+			Variable_D0Kpis3D = D0Kpis3D->at(i);
+			Variable_D0Kpiphi = D0Kpiphi->at(i);
+			Variable_D0lifetime = (D0Kpimass->at(i)*D0Kpid3D->at(i)*pow(10,-2))/(c*D0Kpipt->at(i));
+
+			Variable_TrkD0Kdxy = TrkD0Kdxy->at(i);
+			Variable_TrkD0Kdz = TrkD0Kdz->at(i);
+			Variable_TrkD0Kchi2 = TrkD0Kchi2->at(i);
+			Variable_TrkD0Kpt = TrkD0Kpt->at(i);
+			Variable_TrkD0Keta = TrkD0Keta->at(i);
+			Variable_TrkD0kphi = TrkD0kphi->at(i);
+			Variable_TrkD0Knhits = TrkD0Knhits->at(i);
+
+			Variable_TrkD0pidxy = TrkD0pidxy->at(i);
+			Variable_TrkD0pidz = TrkD0pidz->at(i);
+			Variable_TrkD0pichi2 = TrkD0pichi2->at(i);
+			Variable_TrkD0pieta = TrkD0pieta->at(i);
+			Variable_TrkD0piphi = TrkD0piphi->at(i);
+			Variable_TrkD0pinhits = TrkD0pinhits->at(i);
+
+			Variable_D0KpisXY = D0KpisXY->at(i);
+			Variable_D0Kpid3D = D0Kpid3D->at(i);
+			Variable_D0Kpie3D = D0Kpie3D->at(i);
+			Variable_D0_kT = D0_kT->at(i);
+
 			//vectorInvariantMass_D0.push_back(D0mass->at(i));
-			if (debug)cout << "debug D0(Direct) 12 --------------------"<< endl;
+
 			t_D0analysis.Fill();	
   		}//For D0(Direct)
+		}
 
 		//----------------------------------------
 		//For D* MC
 		//-----------------------------------------	
+		//std::vector<double> deltaR_vec;
+		if ( (MCDsmass->size() > 0) && FlagDsMC){
 		for(unsigned int i=0; i < MCDsmass->size(); i++)
-		{  
+		{  if (debug)cout << "debug D* 17 --------------------"<< endl;
+			if ( MCDsmass->size() == 0) continue;	
 			//Variable_dScandsKpi = dScandsKpi->at(i);
 			Variable_MCDseta = MCDseta->at(i);
 			Variable_MCDsphi = MCDsphi->at(i);
@@ -1378,263 +1394,482 @@ void analysisB2019_OfflineCuts()
 			Variable_MCDsPiet = MCDsPiet->at(i);
 			Variable_MCDsPirapidity = MCDsPirapidity->at(i);
 			Variable_MCDsPimass = MCDsPimass->at(i);
-	
-			t_DsMC.Fill();	
-		}
 
-		//----------------------------------------
-		//For For Matching
-		//-----------------------------------------
-		//double id = -1.;
-		double deltaR =0.;
-		std::vector<double> deltaR_vec;		
-		//double minDeltaR = 0.;
+			hRecEta_MC->Fill(abs(MCDseta->at(i)));
+			hRecPt_MC->Fill(MCDspt->at(i));
 
-		for(unsigned int k=0; k < MCDsmass->size(); k++)
-		{
+			if( (MCDspt->at(i) > 4.) and (MCDspt->at(i) < 5.) ){ GenDspT1++;}
+			if( (MCDspt->at(i) > 5.) and (MCDspt->at(i) < 6.) ){ GenDspT2++;}
+			if( (MCDspt->at(i) > 6.) and (MCDspt->at(i) < 7.) ){ GenDspT3++;}
+			if( (MCDspt->at(i) > 7.) and (MCDspt->at(i) < 8.) ){ GenDspT4++;}
+			if( (MCDspt->at(i) > 8.) and (MCDspt->at(i) < 12.) ){ GenDspT5++;}
+			if( (MCDspt->at(i) > 12.) and (MCDspt->at(i) < 16.) ){ GenDspT6++;}
+			if( (MCDspt->at(i) > 16.) and (MCDspt->at(i) < 24.) ){ GenDspT7++;}
+			if( (MCDspt->at(i) > 24.) and (MCDspt->at(i) < 40.) ){ GenDspT8++;}
+			if( (MCDspt->at(i) > 40.) and (MCDspt->at(i) < 100.) ){ GenDspT9++;}
+
+			if( (abs(MCDseta->at(i)) > 0.) and (abs(MCDseta->at(i)) < 0.2) ){ GenDsEta1++;}
+			if( (abs(MCDseta->at(i)) > 0.2) and (abs(MCDseta->at(i)) < 0.4) ){ GenDsEta2++;}
+			if( (abs(MCDseta->at(i)) > 0.4) and (abs(MCDseta->at(i)) < 0.6) ){ GenDsEta3++;}
+			if( (abs(MCDseta->at(i)) > 0.6) and (abs(MCDseta->at(i)) < 0.8) ){ GenDsEta4++;}
+			if( (abs(MCDseta->at(i)) > 0.8) and (abs(MCDseta->at(i)) < 1.0) ){ GenDsEta5++;}
+			if( (abs(MCDseta->at(i)) > 1.0) and (abs(MCDseta->at(i)) < 1.2) ){ GenDsEta6++;}
+			if( (abs(MCDseta->at(i)) > 1.2) and (abs(MCDseta->at(i)) < 1.4) ){ GenDsEta7++;}
+			if( (abs(MCDseta->at(i)) > 1.4) and (abs(MCDseta->at(i)) < 1.6) ){ GenDsEta8++;}
+			if( (abs(MCDseta->at(i)) > 1.6) and (abs(MCDseta->at(i)) < 1.8) ){ GenDsEta9++;}
+			if( (abs(MCDseta->at(i)) > 1.8) and (abs(MCDseta->at(i)) < 2.1) ){ GenDsEta10++;}
+
+			t_DsMC.Fill();
+			if (debug)cout << "debug D* 18 --------------------"<< endl;
+			//----------------------------------------
+			//For Ds Matching
+			//-----------------------------------------
+			if ( D0mass->size() == 0) continue;
+			double minDeltaR = 1000.;
+			int id = -1;
+			double deltaR = 0.;
 			for(unsigned int j=0; j < D0mass->size(); j++)
-			{  //cout << "debug D* Matching 1 --------------------"<< endl;
-													
+			{  if (debug)cout << "debug D* 19 --------------------"<< endl;													
 				if( D0_VtxProb->at(j) < 0.01) continue;
-				if( D0fromDSs3D->at(j) < SigCutD0fromDs) continue;
 				if( Anglephi->at(j) < 0.99 ) continue;
 				if ( D0pt->at(j) < 3. ) continue;
 				if( (Dsmass->at(j) - D0mass->at(j)) > 0.16) continue; 
-
+				if( D0fromDSs3D->at(j) < SigCutD0fromDs) continue;
 				//DeltaR Function
-				cout << "MCDseta->at(i): " << MCDseta->at(k) << "----Dseta->at(j): " << Dseta->at(j);
-				cout << "MCDsphi->at(i): " << MCDseta->at(k) << "----Dsphi->at(j): " << Dseta->at(j);
-
-				deltaR = sqrt( pow( (MCDseta->at(k)-Dseta->at(j)) ,2) + pow( (MCDsphi->at(k)-Dsphi->at(j)) ,2));
-				cout << "deltaR: " << deltaR;
-				deltaR_vec.push_back(deltaR);
-				//deltaR = sqrt( pow(MCDseta->at(j)-Dseta->at(j) ,2) + pow(MCDsphi->at(j)-Dsphi->at(j) ,2));
-				cout << "debug D* Matching 2 --------------------"<< endl;			
+				deltaR = sqrt( pow( (MCDseta->at(i)-Dseta->at(j)) ,2) + pow( (MCDsphi->at(i)-Dsphi->at(j)) ,2));
+				if( deltaR < minDeltaR) { id = j; minDeltaR = deltaR;} //Get the lower delta
+				if (debug)cout << "debug D* 20 --------------------"<< endl;
 			}	
+
+			if (id == -1) continue;
+			
+			/*Variable_DsetaMatching = Dseta->at(id);
+			Variable_MCDsetaMatching = MCDseta->at(i);
+			Variable_DsphiMatching = Dsphi->at(id);
+			Variable_MCDsphiMatching = MCDsphi->at(i);
+			Variable_DsptMatching = Dspt->at(id);
+			Variable_MCDsptMatching = MCDspt->at(i);*/
+			Variable_deltaRDsMatching = deltaR;
+			DsdeltaEta = MCDseta->at(i) - Dseta->at(id);
+			DsdeltaPhi = MCDsphi->at(i) - Dsphi->at(id);
+			DsdeltaPt = MCDspt->at(i) - Dspt->at(id);
+
+			//Histograms for efficiency
+			if( deltaR < 0.03){
+				hRecEta_Rec1->Fill(abs(Dseta->at(id)));
+				hRecPt_Rec1->Fill(Dspt->at(id));	
+
+				if( (Dspt->at(id) > 4.) and (Dspt->at(id) < 5.) ){ RecDspT1++;}
+				if( (Dspt->at(id) > 5.) and (Dspt->at(id) < 6.) ){ RecDspT2++;}
+				if( (Dspt->at(id) > 6.) and (Dspt->at(id) < 7.) ){ RecDspT3++;}
+				if( (Dspt->at(id) > 7.) and (Dspt->at(id) < 8.) ){ RecDspT4++;}
+				if( (Dspt->at(id) > 8.) and (Dspt->at(id) < 12.) ){ RecDspT5++;}
+				if( (Dspt->at(id) > 12.) and (Dspt->at(id) < 16.) ){ RecDspT6++;}
+				if( (Dspt->at(id) > 16.) and (Dspt->at(id) < 24.) ){ RecDspT7++;}
+				if( (Dspt->at(id) > 24.) and (Dspt->at(id) < 40.) ){ RecDspT8++;}
+				if( (Dspt->at(id) > 40.) and (Dspt->at(id) < 100.) ){ RecDspT9++;}
+
+				if( (abs(Dseta->at(id)) > 0.0) and (abs(Dseta->at(id)) < 0.2) ){ RecDsEta1++;}
+				if( (abs(Dseta->at(id)) > 0.2) and (abs(Dseta->at(id)) < 0.4) ){ RecDsEta2++;}
+				if( (abs(Dseta->at(id)) > 0.4) and (abs(Dseta->at(id)) < 0.6) ){ RecDsEta3++;}
+				if( (abs(Dseta->at(id)) > 0.6) and (abs(Dseta->at(id)) < 0.8) ){ RecDsEta4++;}
+				if( (abs(Dseta->at(id)) > 0.8) and (abs(Dseta->at(id)) < 1.0) ){ RecDsEta5++;}
+				if( (abs(Dseta->at(id)) > 1.0) and (abs(Dseta->at(id)) < 1.2) ){ RecDsEta6++;}
+				if( (abs(Dseta->at(id)) > 1.2) and (abs(Dseta->at(id)) < 1.4) ){ RecDsEta7++;}
+				if( (abs(Dseta->at(id)) > 1.4) and (abs(Dseta->at(id)) < 1.6) ){ RecDsEta8++;}
+				if( (abs(Dseta->at(id)) > 1.6) and (abs(Dseta->at(id)) < 1.8) ){ RecDsEta9++;}
+				if( (abs(Dseta->at(id)) > 1.8) and (abs(Dseta->at(id)) < 2.1) ){ RecDsEta10++;}
+
+			}
+			if( deltaR < 0.06){
+				hRecEta_Rec2->Fill(abs(Dseta->at(id)));
+				hRecPt_Rec2->Fill(Dspt->at(id));	
+						
+			}
+			if( deltaR < 0.2){
+				hRecEta_Rec3->Fill(abs(Dseta->at(id)));
+				hRecPt_Rec3->Fill(Dspt->at(id));
+			}
+			if( deltaR < 0.4){
+				hRecEta_Rec4->Fill(abs(Dseta->at(id)));
+				hRecPt_Rec4->Fill(Dspt->at(id));			
+			}
+
+			t_DsMatching.Fill();
+			
 		}
-		if(deltaR_vec.size() > 0)cout << "deltaR_vec.size() --------------------"<< deltaR_vec.size() << endl;	
-		//std::cout << "deltaR_vec[deltaR_vec] " << deltaR_vec[0] << endl;
-		
-		double minPos = 0, maxPos = 0;
-    	for (unsigned i = 0; i < deltaR_vec.size(); ++i)
-    	{ 	if (deltaR_vec[i] < deltaR_vec[minPos]) { minPos = i;} // Found a smaller min      
-        	//if (deltaR_vec[i] > deltaR_vec[maxPos]) { maxPos = i;} // Found a bigger max
-         //std::cout << " " << deltaR_vec[minPos] << " at position " << minPos << endl;    	
-    	}
-		//std::cout << "deltaR_vec[deltaR_vec] " << deltaR_vec[minPos] << endl;
-    	
-    	
-		 if (debug)cout << "debug D* Matching process 6 --------------------"<< endl;
+		}
+		   	
+		if (debug)cout << "debug D* 21 --------------------"<< endl;
 		//----------------------------------------
 		//For D0 MC
-		//-----------------------------------------	
-		for(unsigned int h1=0; h1 < MCpromptD0eta->size(); h1++)
-		{  
+		//-----------------------------------------
+		if(MCpromptD0mass->size() > 0 && FlagD0MC){
+		for(unsigned int i=0; i < MCpromptD0mass->size(); i++)
+		{  if (debug)cout << "debug D* 22 --------------------"<< endl;
 			//Variable_dScandsKpi = dScandsKpi->at(h1);
-			Variable_MCpromptD0eta = MCpromptD0eta->at(h1);
-			Variable_MCpromptD0phi = MCpromptD0phi->at(h1);
-			Variable_MCpromptD0pt = MCpromptD0pt->at(h1);
-			Variable_MCpromptD0energy = MCpromptD0energy->at(h1);
-			Variable_MCpromptD0p = MCpromptD0p->at(h1);
-			Variable_MCpromptD0et = MCpromptD0et->at(h1);
-			Variable_MCpromptD0rapidity = MCpromptD0rapidity->at(h1);
-			Variable_MCpromptD0mass = MCpromptD0mass->at(h1);
-			Variable_MCpromptD0_Keta = MCpromptD0_Keta->at(h1);
-			Variable_MCpromptD0_Kphi = MCpromptD0_Kphi->at(h1);
-			Variable_MCpromptD0_Kpt = MCpromptD0_Kpt->at(h1);
-			Variable_MCpromptD0_Kenergy = MCpromptD0_Kenergy->at(h1);
-			Variable_MCpromptD0_Kp = MCpromptD0_Kp->at(h1);
-			Variable_MCpromptD0_Ket = MCpromptD0_Ket->at(h1);
-			Variable_MCpromptD0_Krapidity = MCpromptD0_Krapidity->at(h1);
-			Variable_MCpromptD0_Kmass = MCpromptD0_Kmass->at(h1);
-			Variable_MCpromptD0_Pieta = MCpromptD0_Pieta->at(h1);
-			Variable_MCpromptD0_Piphi = MCpromptD0_Piphi->at(h1);
-			Variable_MCpromptD0_Pipt = MCpromptD0_Pipt->at(h1);
-			Variable_MCpromptD0_Pienergy = MCpromptD0_Pienergy->at(h1);
-			Variable_MCpromptD0_Pip = MCpromptD0_Pip->at(h1);
-			Variable_MCpromptD0_Piet = MCpromptD0_Piet->at(h1);
-			Variable_MCpromptD0_Pirapidity = MCpromptD0_Pirapidity->at(h1);
-			Variable_MCpromptD0_Pimass = MCpromptD0_Pimass->at(h1);
-			Variable_MCpromptD0_DispAngle = MCpromptD0_DispAngle->at(h1);
+			Variable_MCpromptD0eta = MCpromptD0eta->at(i);
+			Variable_MCpromptD0phi = MCpromptD0phi->at(i);
+			Variable_MCpromptD0pt = MCpromptD0pt->at(i);
+			Variable_MCpromptD0energy = MCpromptD0energy->at(i);
+			Variable_MCpromptD0p = MCpromptD0p->at(i);
+			Variable_MCpromptD0et = MCpromptD0et->at(i);
+			Variable_MCpromptD0rapidity = MCpromptD0rapidity->at(i);
+			Variable_MCpromptD0mass = MCpromptD0mass->at(i);
+			Variable_MCpromptD0_Keta = MCpromptD0_Keta->at(i);
+			Variable_MCpromptD0_Kphi = MCpromptD0_Kphi->at(i);
+			Variable_MCpromptD0_Kpt = MCpromptD0_Kpt->at(i);
+			Variable_MCpromptD0_Kenergy = MCpromptD0_Kenergy->at(i);
+			Variable_MCpromptD0_Kp = MCpromptD0_Kp->at(i);
+			Variable_MCpromptD0_Ket = MCpromptD0_Ket->at(i);
+			Variable_MCpromptD0_Krapidity = MCpromptD0_Krapidity->at(i);
+			Variable_MCpromptD0_Kmass = MCpromptD0_Kmass->at(i);
+			Variable_MCpromptD0_Pieta = MCpromptD0_Pieta->at(i);
+			Variable_MCpromptD0_Piphi = MCpromptD0_Piphi->at(i);
+			Variable_MCpromptD0_Pipt = MCpromptD0_Pipt->at(i);
+			Variable_MCpromptD0_Pienergy = MCpromptD0_Pienergy->at(i);
+			Variable_MCpromptD0_Pip = MCpromptD0_Pip->at(i);
+			Variable_MCpromptD0_Piet = MCpromptD0_Piet->at(i);
+			Variable_MCpromptD0_Pirapidity = MCpromptD0_Pirapidity->at(i);
+			Variable_MCpromptD0_Pimass = MCpromptD0_Pimass->at(i);
+			Variable_MCpromptD0_DispAngle = MCpromptD0_DispAngle->at(i);
 
-			t_D0MC.Fill();	
-		}
+			hRecD0Eta_MC->Fill(abs(MCpromptD0eta->at(i)));
+			hRecD0Pt_MC->Fill(MCpromptD0pt->at(i));
 
-		//Mat D*
-		/*for(unsigned int h2=0; h2 < DsetaMatching->size(); h2++)
-		{  
-			Variable_DsetaMatching = DsetaMatching->at(h2);
-			Variable_MCDsetaMatching = MCDsetaMatching->at(h2);
-			Variable_DsphiMatching = DsphiMatching->at(h2);
-			Variable_MCDsphiMatching = MCDsphiMatching->at(h2);
-			Variable_DsptMatching = DsptMatching->at(h2);
-			Variable_MCDsptMatching = MCDsptMatching->at(h2); 
-			Variable_D0fromDsmass = D0fromDsmass->at(h2);
-			Variable_deltaRDsMatching = deltaRDsMatching->at(h2);
+			if( (MCpromptD0pt->at(i) > 4.) and (MCpromptD0pt->at(i) < 5.) ){ GenD0pT1++;}
+			if( (MCpromptD0pt->at(i) > 5.) and (MCpromptD0pt->at(i) < 6.) ){ GenD0pT2++;}
+			if( (MCpromptD0pt->at(i) > 6.) and (MCpromptD0pt->at(i) < 7.) ){ GenD0pT3++;}
+			if( (MCpromptD0pt->at(i) > 7.) and (MCpromptD0pt->at(i) < 8.) ){ GenD0pT4++;}
+			if( (MCpromptD0pt->at(i) > 8.) and (MCpromptD0pt->at(i) < 12.) ){ GenD0pT5++;}
+			if( (MCpromptD0pt->at(i) > 12.) and (MCpromptD0pt->at(i) < 16.) ){ GenD0pT6++;}
+			if( (MCpromptD0pt->at(i) > 16.) and (MCpromptD0pt->at(i) < 24.) ){ GenD0pT7++;}
+			if( (MCpromptD0pt->at(i) > 24.) and (MCpromptD0pt->at(i) < 40.) ){ GenD0pT8++;}
+			if( (MCpromptD0pt->at(i) > 40.) and (MCpromptD0pt->at(i) < 100.) ){ GenD0pT9++;}
 
-			if( DsptMatching->at(h2)>2 && MCDsptMatching->at(h2)>2 && abs(D0fromDsmass->at(h2) - 1.865)<0.024 )
-			{				
-				if( deltaRDsMatching->at(h2) < 0.01)
-				{
-					hRecEta_Rec1->Fill(abs(DsetaMatching->at(h2)));
-					hRecEta_MC1->Fill(abs(MCDsetaMatching->at(h2)));
-					hRecPhi_Rec1->Fill(DsphiMatching->at(h2));
-					hRecPhi_MC1->Fill(MCDsphiMatching->at(h2));
-					hRecPt_Rec1->Fill(DsptMatching->at(h2));
-					hRecPt_MC1->Fill(MCDsptMatching->at(h2));																			
-				}
-				if( deltaRDsMatching->at(h2) < 0.02)
-				{
-					hRecEta_Rec2->Fill(abs(DsetaMatching->at(h2)));
-					hRecEta_MC2->Fill(abs(MCDsetaMatching->at(h2)));
-					hRecPhi_Rec2->Fill(DsphiMatching->at(h2));
-					hRecPhi_MC2->Fill(MCDsphiMatching->at(h2));
-					hRecPt_Rec2->Fill(DsptMatching->at(h2));
-					hRecPt_MC2->Fill(MCDsptMatching->at(h2));	
-				}
-				if( deltaRDsMatching->at(h2) < 0.03 )
-				{
-					hRecEta_Rec3->Fill(abs(DsetaMatching->at(h2)));
-					hRecEta_MC3->Fill(abs(MCDsetaMatching->at(h2)));
-					hRecPhi_Rec3->Fill(DsphiMatching->at(h2));
-					hRecPhi_MC3->Fill(MCDsphiMatching->at(h2));
-					hRecPt_Rec3->Fill(DsptMatching->at(h2));
-					hRecPt_MC3->Fill(MCDsptMatching->at(h2));
-				}
-				if( deltaRDsMatching->at(h2) < 0.04 )
-				{
-					hRecEta_Rec4->Fill(abs(DsetaMatching->at(h2)));
-					hRecEta_MC4->Fill(abs(MCDsetaMatching->at(h2)));
-					hRecPhi_Rec4->Fill(DsphiMatching->at(h2));
-					hRecPhi_MC4->Fill(MCDsphiMatching->at(h2));
-					hRecPt_Rec4->Fill(DsptMatching->at(h2));
-					hRecPt_MC4->Fill(MCDsptMatching->at(h2));
-				}
-				if( deltaRDsMatching->at(h2) < 0.05 )
-				{
-					hRecEta_Rec5->Fill(abs(DsetaMatching->at(h2)));
-					hRecEta_MC5->Fill(abs(MCDsetaMatching->at(h2)));
-					hRecPhi_Rec5->Fill(DsphiMatching->at(h2));
-					hRecPhi_MC5->Fill(MCDsphiMatching->at(h2));
-					hRecPt_Rec5->Fill(DsptMatching->at(h2));
-					hRecPt_MC5->Fill(MCDsptMatching->at(h2));
-				}
+			if( (abs(MCpromptD0eta->at(i)) > 0.0) and (abs(MCpromptD0eta->at(i)) < 0.2) ){ GenD0Eta1++;}
+			if( (abs(MCpromptD0eta->at(i)) > 0.2) and (abs(MCpromptD0eta->at(i)) < 0.4) ){ GenD0Eta2++;}
+			if( (abs(MCpromptD0eta->at(i)) > 0.4) and (abs(MCpromptD0eta->at(i)) < 0.6) ){ GenD0Eta3++;}
+			if( (abs(MCpromptD0eta->at(i)) > 0.6) and (abs(MCpromptD0eta->at(i)) < 0.8) ){ GenD0Eta4++;}
+			if( (abs(MCpromptD0eta->at(i)) > 0.8) and (abs(MCpromptD0eta->at(i)) < 1.0) ){ GenD0Eta5++;}
+			if( (abs(MCpromptD0eta->at(i)) > 1.0) and (abs(MCpromptD0eta->at(i)) < 1.2) ){ GenD0Eta6++;}
+			if( (abs(MCpromptD0eta->at(i)) > 1.2) and (abs(MCpromptD0eta->at(i)) < 1.4) ){ GenD0Eta7++;}
+			if( (abs(MCpromptD0eta->at(i)) > 1.4) and (abs(MCpromptD0eta->at(i)) < 1.6) ){ GenD0Eta8++;}
+			if( (abs(MCpromptD0eta->at(i)) > 1.6) and (abs(MCpromptD0eta->at(i)) < 1.8) ){ GenD0Eta9++;}
+			if( (abs(MCpromptD0eta->at(i)) > 1.8) and (abs(MCpromptD0eta->at(i)) < 2.1) ){ GenD0Eta10++;}
 
-				if( deltaRDsMatching->at(h2) < 0.06)
-				{
-					hRecEta_Rec6->Fill(abs(DsetaMatching->at(h2)));
-					hRecEta_MC6->Fill(abs(MCDsetaMatching->at(h2)));
-					hRecPhi_Rec6->Fill(DsphiMatching->at(h2));
-					hRecPhi_MC6->Fill(MCDsphiMatching->at(h2));
-					hRecPt_Rec6->Fill(DsptMatching->at(h2));
-					hRecPt_MC6->Fill(MCDsptMatching->at(h2));
-				}
-			}
-			t_DsMatching.Fill();	
-		}
+			t_D0MC.Fill();
+			if (debug)cout << "debug D* 23 --------------------"<< endl;
+			//----------------------------------------
+			//For D0 Matching
+			//-----------------------------------------
+			if ( D0Kpimass->size() == 0) continue;
+			double minDeltaR = 1000.;
+			int id = -1;
+			double deltaR = 0.;
+			for(unsigned int j = 0; j < D0Kpimass->size(); j++)
+			{  													
+				if( D0Kpi_VtxProb->at(j) < 0.01) continue;
+				if( D0KpiDispAngle->at(j) < 0.99 ) continue;
+				if( abs(D0Kpimass->at(j)-1.86484) > 0.1) continue;
+				if( D0Kpipt->at(j) < 2. ) continue;	
+				if( D0Kpis3D->at(j) < SigCutD0) continue;
+				
+				//DeltaR Function
+				deltaR = sqrt( pow( (MCpromptD0eta->at(i)-D0Kpieta->at(j)) ,2) + pow( (MCpromptD0phi->at(i)-D0Kpiphi->at(j)) ,2) );
+				if( deltaR < minDeltaR) { id = j; minDeltaR = deltaR;} //Get the lower delta
+				if (debug)cout << "debug D0 Matching --------------------"<< endl;	
+			}	
 
-		for(unsigned int h3=0; h3 < D0etaMatching->size(); h3++)
-		{  
-			Variable_D0etaMatching = D0etaMatching->at(h3);
-			Variable_MCD0etaMatching = MCD0etaMatching->at(h3);
+			if (id == -1) continue;
+			
+			/*Variable_D0etaMatching = D0etaMatching->at(h3);
 			Variable_D0phiMatching = D0phiMatching->at(h3);
-			Variable_MCD0phiMatching = MCD0phiMatching->at(h3);
 			Variable_D0ptMatching = D0ptMatching->at(h3);
-			Variable_MCD0ptMatching = MCD0ptMatching->at(h3);
 			Variable_D0KtMatching = D0KtMatching->at(h3);
 			Variable_D0SxyMatching = D0SxyMatching->at(h3);
 			Variable_D0OpAngleMatching = D0OpAngleMatching->at(h3);
-			Variable_deltaRD0Matching = deltaRD0Matching->at(h3);
 
-			if(D0SxyMatching->at(h3)>2 && D0KtMatching->at(h3) > 0.3 && D0OpAngleMatching->at(h3) < 0.15)
-			{
-				if( deltaRD0Matching->at(h3) < 0.01)
-				{
-					hRecD0Eta_Rec1->Fill(abs(D0etaMatching->at(h3)));
-					hRecD0Eta_MC1->Fill(abs(MCD0etaMatching->at(h3)));
-					hRecD0Phi_Rec1->Fill(D0phiMatching->at(h3));
-					hRecD0Phi_MC1->Fill(MCD0phiMatching->at(h3));
-					hRecD0Pt_Rec1->Fill(D0ptMatching->at(h3));
-					hRecD0Pt_MC1->Fill(MCD0ptMatching->at(h3));
-				}
-				if( deltaRD0Matching->at(h3) < 0.02)
-				{
-					hRecD0Eta_Rec2->Fill(abs(D0etaMatching->at(h3)));
-					hRecD0Eta_MC2->Fill(abs(MCD0etaMatching->at(h3)));
-					hRecD0Phi_Rec2->Fill(D0phiMatching->at(h3));
-					hRecD0Phi_MC2->Fill(MCD0phiMatching->at(h3));
-					hRecD0Pt_Rec2->Fill(D0ptMatching->at(h3));
-					hRecD0Pt_MC2->Fill(MCD0ptMatching->at(h3));								
-				}
-				if( deltaRD0Matching->at(h3) < 0.03)
-				{
-					hRecD0Eta_Rec3->Fill(abs(D0etaMatching->at(h3)));
-					hRecD0Eta_MC3->Fill(abs(MCD0etaMatching->at(h3)));
-					hRecD0Phi_Rec3->Fill(D0phiMatching->at(h3));
-					hRecD0Phi_MC3->Fill(MCD0phiMatching->at(h3));
-					hRecD0Pt_Rec3->Fill(D0ptMatching->at(h3));
-					hRecD0Pt_MC3->Fill(MCD0ptMatching->at(h3));                     
-				}
-				if( deltaRD0Matching->at(h3) < 0.04)
-				{
-					hRecD0Eta_Rec4->Fill(abs(D0etaMatching->at(h3)));
-					hRecD0Eta_MC4->Fill(abs(MCD0etaMatching->at(h3)));
-					hRecD0Phi_Rec4->Fill(D0phiMatching->at(h3));
-					hRecD0Phi_MC4->Fill(MCD0phiMatching->at(h3));
-					hRecD0Pt_Rec4->Fill(D0ptMatching->at(h3));
-					hRecD0Pt_MC4->Fill(MCD0ptMatching->at(h3));              
-				}
-				if( deltaRD0Matching->at(h3) < 0.05)
-				{
-					hRecD0Eta_Rec5->Fill(abs(D0etaMatching->at(h3)));
-					hRecD0Eta_MC5->Fill(abs(MCD0etaMatching->at(h3)));
-					hRecD0Phi_Rec5->Fill(D0phiMatching->at(h3));
-					hRecD0Phi_MC5->Fill(MCD0phiMatching->at(h3));
-					hRecD0Pt_Rec5->Fill(D0ptMatching->at(h3));
-					hRecD0Pt_MC5->Fill(MCD0ptMatching->at(h3));
-				}
+			Variable_MCD0etaMatching = MCD0etaMatching->at(h3);
+			Variable_MCD0phiMatching = MCD0phiMatching->at(h3);
+			Variable_MCD0ptMatching = MCD0ptMatching->at(h3);*/
+			Variable_deltaRD0Matching = deltaR;
+		
+			D0deltaEta = MCpromptD0eta->at(i)-D0Kpieta->at(id);
+			D0deltaPhi = MCpromptD0phi->at(i)-D0Kpiphi->at(id);
+			D0deltaPt = MCpromptD0pt->at(i)-D0Kpipt->at(id);
 
-				if( deltaRD0Matching->at(h3) < 0.06)
-				{
-					hRecD0Eta_Rec6->Fill(abs(D0etaMatching->at(h3)));
-					hRecD0Eta_MC6->Fill(abs(MCD0etaMatching->at(h3)));
-					hRecD0Phi_Rec6->Fill(D0phiMatching->at(h3));
-					hRecD0Phi_MC6->Fill(MCD0phiMatching->at(h3));
-					hRecD0Pt_Rec6->Fill(D0ptMatching->at(h3));
-					hRecD0Pt_MC6->Fill(MCD0ptMatching->at(h3));
-				}
+			if( deltaR < 0.03)
+			{	hRecD0Eta_Rec1->Fill( abs(D0Kpieta->at(id)) );
+				hRecD0Pt_Rec1->Fill( D0Kpipt->at(id) );
+	
+				if( (D0Kpipt->at(id) > 4.) and (D0Kpipt->at(id) < 5.) ){ RecD0pT1++;}
+				if( (D0Kpipt->at(id) > 5.) and (D0Kpipt->at(id) < 6.) ){ RecD0pT2++;}
+				if( (D0Kpipt->at(id) > 6.) and (D0Kpipt->at(id) < 7.) ){ RecD0pT3++;}
+				if( (D0Kpipt->at(id) > 7.) and (D0Kpipt->at(id) < 8.) ){ RecD0pT4++;}
+				if( (D0Kpipt->at(id) > 8.) and (D0Kpipt->at(id) < 12.) ){ RecD0pT5++;}
+				if( (D0Kpipt->at(id) > 12.) and (D0Kpipt->at(id) < 16.) ){ RecD0pT6++;}
+				if( (D0Kpipt->at(id) > 16.) and (D0Kpipt->at(id) < 24.) ){ RecD0pT7++;}
+				if( (D0Kpipt->at(id) > 24.) and (D0Kpipt->at(id) < 40.) ){ RecD0pT8++;}
+				if( (D0Kpipt->at(id) > 40.) and (D0Kpipt->at(id) < 100.) ){ RecD0pT9++;}
+
+				if( (abs(D0Kpieta->at(id)) > 0.0) and (abs(D0Kpieta->at(id)) < 0.2) ){ RecD0Eta1++;}
+				if( (abs(D0Kpieta->at(id)) > 0.2) and (abs(D0Kpieta->at(id)) < 0.4) ){ RecD0Eta2++;}
+				if( (abs(D0Kpieta->at(id)) > 0.4) and (abs(D0Kpieta->at(id)) < 0.6) ){ RecD0Eta3++;}
+				if( (abs(D0Kpieta->at(id)) > 0.6) and (abs(D0Kpieta->at(id)) < 0.8) ){ RecD0Eta4++;}
+				if( (abs(D0Kpieta->at(id)) > 0.8) and (abs(D0Kpieta->at(id)) < 1.0) ){ RecD0Eta5++;}
+				if( (abs(D0Kpieta->at(id)) > 1.0) and (abs(D0Kpieta->at(id)) < 1.2) ){ RecD0Eta6++;}
+				if( (abs(D0Kpieta->at(id)) > 1.2) and (abs(D0Kpieta->at(id)) < 1.4) ){ RecD0Eta7++;}
+				if( (abs(D0Kpieta->at(id)) > 1.4) and (abs(D0Kpieta->at(id)) < 1.6) ){ RecD0Eta8++;}
+				if( (abs(D0Kpieta->at(id)) > 1.6) and (abs(D0Kpieta->at(id)) < 1.8) ){ RecD0Eta9++;}
+				if( (abs(D0Kpieta->at(id)) > 1.8) and (abs(D0Kpieta->at(id)) < 2.1) ){ RecD0Eta10++;}
+
+			}
+			if( deltaR < 0.06)
+			{	hRecD0Eta_Rec2->Fill( abs(D0Kpieta->at(id)) );
+				hRecD0Pt_Rec2->Fill( D0Kpipt->at(id) );
+			
+			}
+			if( deltaR < 0.2)
+			{	hRecD0Eta_Rec3->Fill( abs(D0Kpieta->at(id)) );
+				hRecD0Pt_Rec3->Fill( D0Kpipt->at(id) );
 
 			}
 
-			t_D0Matching.Fill();	
-		}*/ 
-			
-		if (debug)cout << "debug 13 --------------------"<< endl;	
+			if( deltaR < 0.4)
+			{	hRecD0Eta_Rec4->Fill( abs(D0Kpieta->at(id)) );
+				hRecD0Pt_Rec4->Fill( D0Kpipt->at(id) );
+			}
+		
+			t_D0Matching.Fill(); //Fill tree
+		}
+		}
+ 			
+		if (debug)cout << "debug 24 --------------------"<< endl;	
 	}//End loop tree entries for file f1
 
-	if (debug)cout << "debug 14 --------------------"<< endl;
+	if (debug)cout << "debug 25 --------------------"<< endl;
 
-	TCanvas* canvas = new TCanvas("canvas","",900,600);
+	cout << "--------------------"<< endl;
+	cout << "NumberOfEvents: " << NumberOfEvents << endl;
+	cout << "EventsAfterTrigger: " << EventsAfterTrigger << endl;
+	cout << "--------------------"<< endl;
+	cout << "PossibleDs: " << PossibleDs << endl;
+	cout << "DsD0ProbVtx: " << DsD0ProbVtx << endl;
+	cout << "DsD0Angle: " << DsD0Angle << endl;
+	cout << "D0fromDsMinusPDG: " << D0fromDsMinusPDG << endl;
+	cout << "DsD0pt: " << DsD0pt << endl;
+	cout << "DsD0deltaM: " << DsD0deltaM << endl;
+	cout << "DsD0Sig: " << DsD0Sig << endl;
+	cout << "--------------------"<< endl;
+	cout << "PossibleD0: " << PossibleD0 <<  endl;
+	cout << "D0ProbVtx: " << D0ProbVtx <<  endl;
+	cout << "D0Angle: " << D0Angle << endl;
+	cout << "CountD0minusPDG: " << CountD0minusPDG << endl;
+	cout << "CountD0pt: " << CountD0pt  << endl;
+	cout << "D0Sig: " << D0Sig << endl;
+	
+	if (Dataset == "MC_DStarToD0Pi_D0KPi" or Dataset == "MC_MinBias"){
+	cout << "------Rec Ds Efficiency--------------"<< endl;
+	cout << "pT range / N Gen / N Rec / Efficiency  ----------"<< endl;
+	cout << "$4 < pT < 5$ & " << GenDspT1 << " & "<< RecDspT1 << " & " << RecDspT1*1./GenDspT1 << " end" << endl;
+	cout << "$5 < pT < 6$ & " << GenDspT2 << " & "<< RecDspT2 << " & " << RecDspT2*1./GenDspT2 << " end" << endl;
+	cout << "$6 < pT < 7$ & " << GenDspT3 << " & "<< RecDspT3 << " & " << RecDspT3*1./GenDspT3 << " end" << endl;
+	cout << "$7 < pT < 8$ & " << GenDspT4 << " & "<< RecDspT4 << " & " << RecDspT4*1./GenDspT4 << " end" << endl;
+	cout << "$8 < pT < 12$ & " << GenDspT5 << " & "<< RecDspT5 << " & " << RecDspT5*1./GenDspT5 << " end" << endl;
+	cout << "$12 < pT < 16$ & " << GenDspT6 << " & "<< RecDspT6 << " & " << RecDspT6*1./GenDspT6 << " end" << endl;
+	cout << "$16 < pT < 24$ & " << GenDspT7 << " & "<< RecDspT7 << " & " << RecDspT7*1./GenDspT7 << " end" << endl;
+	cout << "$24 < pT < 40$ & " << GenDspT8 << " & "<< RecDspT8 << " & " << RecDspT8*1./GenDspT8 << " end" << endl;
+	cout << "$40 < pT < 100$ & " << GenDspT9 << " & "<< RecDspT9 << " & " << RecDspT9*1./GenDspT9 << " end" << endl;
+	cout << "eta range / N Gen / N Rec / Efficiency  ----------"<< endl;
+	cout << "$0.0 < eta < 0.2 $ & " << GenDsEta1 << " & "<< RecDsEta1 << " & " << RecDsEta1*1./GenDsEta1 << " end" << endl;
+	cout << "$0.2 < eta < 0.4 $ & " << GenDsEta2 << " & "<< RecDsEta2 << " & " << RecDsEta2*1./GenDsEta2 << " end" << endl;
+	cout << "$0.4 < eta < 0.6 $ & " << GenDsEta3 << " & "<< RecDsEta3 << " & " << RecDsEta3*1./GenDsEta3 << " end" << endl;
+	cout << "$0.6 < eta < 0.7 $ & " << GenDsEta4 << " & "<< RecDsEta4 << " & " << RecDsEta4*1./GenDsEta4 << " end" << endl;
+	cout << "$0.8 < eta < 1.0 $ & " << GenDsEta5 << " & "<< RecDsEta5 << " & " << RecDsEta5*1./GenDsEta5 << " end" << endl;
+	cout << "$1.0 < eta < 1.2 $ & " << GenDsEta6 << " & "<< RecDsEta6 << " & " << RecDsEta6*1./GenDsEta6 << " end" << endl;
+	cout << "$1.2 < eta < 1.4 $ & " << GenDsEta7 << " & "<< RecDsEta7 << " & " << RecDsEta7*1./GenDsEta7 << " end" << endl;
+	cout << "$1.4 < eta < 1.6 $ & " << GenDsEta8 << " & "<< RecDsEta8 << " & " << RecDsEta8*1./GenDsEta8 << " end" << endl;
+	cout << "$1.6 < eta < 1.8 $ & " << GenDsEta9 << " & "<< RecDsEta9 << " & " << RecDsEta9*1./GenDsEta9 << " end" << endl;
+	cout << "$1.8 < eta < 2.1 $ & " << GenDsEta10 << " & "<< RecDsEta9 << " & " << RecDsEta10*1./GenDsEta10 << " end" << endl;
+	cout << "------Rec D0 Efficiency--------------"<< endl;
+	cout << "pt range / N Gen / N Rec / Efficiency  ----------"<< endl;
+	cout << "pT range / N Gen / N Rec / Efficiency  ----------"<< endl;
+	cout << "$4 < pT < 5$ & " << GenD0pT1 << " & "<< RecD0pT1 << " & " << RecD0pT1*1./GenD0pT1 << " end" << endl;
+	cout << "$5 < pT < 6$ & " << GenD0pT2 << " & "<< RecD0pT2 << " & " << RecD0pT2*1./GenD0pT2 << " end" << endl;
+	cout << "$6 < pT < 7$ & " << GenD0pT3 << " & "<< RecD0pT3 << " & " << RecD0pT3*1./GenD0pT3 << " end" << endl;
+	cout << "$7 < pT < 8$ & " << GenD0pT4 << " & "<< RecD0pT4 << " & " << RecD0pT4*1./GenD0pT4 << " end" << endl;
+	cout << "$8 < pT < 12$ & " << GenD0pT5 << " & "<< RecD0pT5 << " & " << RecD0pT5*1./GenD0pT5 << " end" << endl;
+	cout << "$12 < pT < 16$ & " << GenD0pT6 << " & "<< RecD0pT6 << " & " << RecD0pT6*1./GenD0pT6 << " end" << endl;
+	cout << "$16 < pT < 24$ & " << GenD0pT7 << " & "<< RecD0pT7 << " & " << RecD0pT7*1./GenD0pT7 << " end" << endl;
+	cout << "$24 < pT < 40$ & " << GenD0pT8 << " & "<< RecD0pT8 << " & " << RecD0pT8*1./GenD0pT8 << " end" << endl;
+	cout << "$40 < pT < 100$ & " << GenD0pT9 << " & "<< RecD0pT9 << " & " << RecD0pT9*1./GenD0pT9 << " end" << endl;
+	cout << "eta range / N Gen / N Rec / Efficiency  ----------"<< endl;
+	cout << "$0.0 < eta < 0.2 $ & " << GenD0Eta1 << " & "<< RecD0Eta1 << " & " << RecD0Eta1*1./GenD0Eta1 << " end" << endl;
+	cout << "$0.2 < eta < 0.4 $ & " << GenD0Eta2 << " & "<< RecD0Eta2 << " & " << RecD0Eta2*1./GenD0Eta2 << " end" << endl;
+	cout << "$0.4 < eta < 0.6 $ & " << GenD0Eta3 << " & "<< RecD0Eta3 << " & " << RecD0Eta3*1./GenD0Eta3 << " end" << endl;
+	cout << "$0.6 < eta < 0.7 $ & " << GenD0Eta4 << " & "<< RecD0Eta4 << " & " << RecD0Eta4*1./GenD0Eta4 << " end" << endl;
+	cout << "$0.8 < eta < 1.0 $ & " << GenD0Eta5 << " & "<< RecD0Eta5 << " & " << RecD0Eta5*1./GenD0Eta5 << " end" << endl;
+	cout << "$1.0 < eta < 1.2 $ & " << GenD0Eta6 << " & "<< RecD0Eta6 << " & " << RecD0Eta6*1./GenD0Eta6 << " end" << endl;
+	cout << "$1.2 < eta < 1.4 $ & " << GenD0Eta7 << " & "<< RecD0Eta7 << " & " << RecD0Eta7*1./GenD0Eta7 << " end" << endl;
+	cout << "$1.4 < eta < 1.6 $ & " << GenD0Eta8 << " & "<< RecD0Eta8 << " & " << RecD0Eta8*1./GenD0Eta8 << " end" << endl;
+	cout << "$1.6 < eta < 1.8 $ & " << GenD0Eta9 << " & "<< RecD0Eta9 << " & " << RecD0Eta9*1./GenD0Eta9 << " end" << endl;
+	cout << "$1.8 < eta < 2.1 $ & " << GenD0Eta10 << " & "<< RecD0Eta10 << " & " << RecD0Eta10*1./GenD0Eta10 << " end" << endl;
+	cout << "--------------------"<< endl;}
+
+	TCanvas* canvas = new TCanvas("PreliminarStudyDs","",900,600);
 	canvas->Divide(3,3);
 	canvas->cd(1);
-	D0massHisto->Draw("e1p");
-	canvas->cd(2);
-	DsmassHisto->Draw("e1p");
-	canvas->cd(3);
-	//TotalD0fromDSs3DHisto->Draw("Histo");
-	D0fromDSs3DHisto->Draw("Histo");
-	canvas->cd(4);	
-	DsMinusD0Histo->Draw("Histo");
-	canvas->cd(5);
 	D0VtxProbHisto->Draw("Histo");
+	canvas->cd(2);
+	TotalD0fromDSs3DHisto->Draw("Histo");
+	canvas->cd(3);
+	D0fromDSs3DHisto->Draw("Histo");	
+	canvas->cd(4);
+	DsmassHisto->Draw("e1p");
+	canvas->cd(5);
+	D0massHisto->Draw("e1p");
 	canvas->cd(6);
-	D0KpimassHisto->Draw("e1p");
+	DsMinusD0Histo->Draw("Histo");
 	canvas->cd(7);
-	D0Kpis3DHisto->Draw("Histo");
+	DslifetimeHisto->Draw("Histo");
 	canvas->cd(8);
-	D0Kpi_VtxProbHisto->Draw("Histo");
+	canvas->SaveAs(Form("%s%s/PreliminarStudyDs_%s.pdf", path2.c_str(), Dataset.c_str(), Dataset.c_str() ));
 
-	canvas->SaveAs("/eos/user/r/ragomesd/analysisB2019/canvas/PreliminarStudy.pdf");
+	canvas = new TCanvas("PreliminarStudyD0","",900,600);
+	canvas->Divide(3,3);
+	canvas->cd(1);
+	D0Kpi_VtxProbHisto->Draw("Histo");
+	canvas->cd(2);
+	TotalD0Kpis3DHistoHisto->Draw("Histo");
+	canvas->cd(3);
+	D0Kpis3DHisto->Draw("Histo");
+	canvas->cd(4);	
+	D0KpimassHisto->Draw("e1p");
+	canvas->cd(5);
+	D0lifetimeHisto->Draw("Histo");
+	canvas->cd(6);
+	canvas->cd(7);
+	canvas->cd(8);
+	canvas->SaveAs(Form("%s%s/PreliminarStudyD0_%s.pdf", path2.c_str(), Dataset.c_str(), Dataset.c_str() ));
+
+	canvas = new TCanvas("PreliminarStudyDsMass","",900,600);
+	canvas->Divide(3,3);
+	canvas->cd(1);
+	DsmassHisto0->Draw("e1p");
+	TLatex* tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 0.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig = 0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig = 0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(2);
+	DsmassHisto1->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 0.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 0.5) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 0.5) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(3);
+	DsmassHisto2->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 1.0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 1.0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 1.0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(4);	
+	DsmassHisto3->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 1.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 1.5) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 1.5) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(5);
+	DsmassHisto4->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 2.0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 2.0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 2.0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(6);
+	DsmassHisto5->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 2.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 2.5) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 2.5) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(7);
+	DsmassHisto6->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 3.0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 3.0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 3.0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(8);
+	canvas->SaveAs(Form("%s%s/PreliminarStudyDsMass_%s.pdf", path2.c_str(), Dataset.c_str(), Dataset.c_str() ));
+
+	canvas = new TCanvas("PreliminarStudyD0Mass","",900,600);
+	canvas->Divide(3,4);
+	canvas->cd(1);
+	D0KpimassHisto0->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig = 0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig = 0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig = 0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(2);
+	D0KpimassHisto1->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 0.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 0.5) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 0.5) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(3);
+	D0KpimassHisto2->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 1.0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 1.0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 1.0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(4);	
+	D0KpimassHisto3->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 1.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 1.5) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 1.5) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(5);
+	D0KpimassHisto4->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 2.0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 2.0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 2.0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(6);
+	D0KpimassHisto5->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 2.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 2.5) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 2.5) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(7);
+	D0KpimassHisto6->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 3.0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 3.0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 3.0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(8);
+	D0KpimassHisto7->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 3.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 3.5) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 3.5) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(9);
+	D0KpimassHisto8->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 4.0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 4.0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 4.0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(10);
+	D0KpimassHisto9->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 4.5) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 4.5) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 4.5) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->cd(11);
+	D0KpimassHisto10->Draw("e1p");
+	tex13 = new TLatex(0.15, 0.855, "#bf{DATA-Bparking pp-13Tev (Sig > 5.0) }");
+	if(Dataset == "MC_DStarToD0Pi_D0KPi"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-DStar-pythia8-evtgen pp-13Tev (Sig > 5.0) }");}
+	if(Dataset == "MC_MinBias"){tex13 = new TLatex(0.15, 0.855, "#bf{MC-MinBias_ pp-13Tev (Sig > 5.0) }");}
+	tex13->SetNDC(kTRUE); tex13->SetTextFont(42); tex13->SetTextSize(0.04); tex13->Draw();
+	canvas->SaveAs(Form("%s%s/PreliminarStudyD0Mass_%s.pdf", path2.c_str(), Dataset.c_str(), Dataset.c_str() ));
+
 
 	if (debug)cout << "debug 15 --------------------"<< endl;
 
@@ -1642,10 +1877,7 @@ void analysisB2019_OfflineCuts()
 
 	//TBranch *D0mass_branch; D0mass_branch = 
 	f_analysis.cd();
-	D0massHisto->Write();//Write() if a file is open, this function writes a root objectics on it.
-	DsmassHisto->Write();
-	DsMinusD0Histo->Write();
-	D0KpimassHisto->Write();
+
 	t_analysis.Write();  //Write in the root file
 	t_DstarWrongCombination.Write();
 	t_D0analysis.Write();
@@ -1654,92 +1886,97 @@ void analysisB2019_OfflineCuts()
 	t_DsMatching.Write();
 	t_D0Matching.Write();
 
+	hRecEta_MC->Write(); //Write() if a file is open, this function writes a root objectics on it.
+	hRecPt_MC->Write();
+
 	hRecEta_Rec1->Write();
-	hRecEta_MC1->Write();
-	hRecPhi_Rec1->Write();
-	hRecPhi_MC1->Write();
 	hRecPt_Rec1->Write();
-	hRecPt_MC1->Write();
 
 	hRecEta_Rec2->Write();
-	hRecEta_MC2->Write();
-	hRecPhi_Rec2->Write();
-	hRecPhi_MC2->Write();
 	hRecPt_Rec2->Write();
-	hRecPt_MC2->Write();		
 
 	hRecEta_Rec3->Write();
-	hRecEta_MC3->Write();
-	hRecPhi_Rec3->Write();
-	hRecPhi_MC3->Write();
 	hRecPt_Rec3->Write();
-	hRecPt_MC3->Write();		
 
 	hRecEta_Rec4->Write();
-	hRecEta_MC4->Write();
-	hRecPhi_Rec4->Write();
-	hRecPhi_MC4->Write();
 	hRecPt_Rec4->Write();
-	hRecPt_MC4->Write();		
-
-	hRecEta_Rec5->Write();
-	hRecEta_MC5->Write();
-	hRecPhi_Rec5->Write();
-	hRecPhi_MC5->Write();
-	hRecPt_Rec5->Write();
-	hRecPt_MC5->Write();
-
-	hRecEta_Rec6->Write();
-	hRecEta_MC6->Write();
-	hRecPhi_Rec6->Write();
-	hRecPhi_MC6->Write();
-	hRecPt_Rec6->Write();
-	hRecPt_MC6->Write();
-
 	//------------------------------------------
+	hRecD0Eta_MC->Write();
+	hRecD0Pt_MC->Write();
+
 	hRecD0Eta_Rec1->Write();
-	hRecD0Eta_MC1->Write();
-	hRecD0Phi_Rec1->Write();
-	hRecD0Phi_MC1->Write();
 	hRecD0Pt_Rec1->Write();
-	hRecD0Pt_MC1->Write();
 
 	hRecD0Eta_Rec2->Write();
-	hRecD0Eta_MC2->Write();
-	hRecD0Phi_Rec2->Write();
-	hRecD0Phi_MC2->Write();
 	hRecD0Pt_Rec2->Write();
-	hRecD0Pt_MC2->Write();
 
 	hRecD0Eta_Rec3->Write();
-	hRecD0Eta_MC3->Write();
-	hRecD0Phi_Rec3->Write();
-	hRecD0Phi_MC3->Write();
 	hRecD0Pt_Rec3->Write();
-	hRecD0Pt_MC3->Write();
 
 	hRecD0Eta_Rec4->Write();
-	hRecD0Eta_MC4->Write();
-	hRecD0Phi_Rec4->Write();
-	hRecD0Phi_MC4->Write();
 	hRecD0Pt_Rec4->Write();
-	hRecD0Pt_MC4->Write();
-
-	hRecD0Eta_Rec5->Write();
-	hRecD0Eta_MC5->Write();
-	hRecD0Phi_Rec5->Write();
-	hRecD0Phi_MC5->Write();
-	hRecD0Pt_Rec5->Write();
-	hRecD0Pt_MC5->Write();
-
-	hRecD0Eta_Rec6->Write();
-	hRecD0Eta_MC6->Write();
-	hRecD0Phi_Rec6->Write();
-	hRecD0Phi_MC6->Write();
-	hRecD0Pt_Rec6->Write();
-	hRecD0Pt_MC6->Write();
+	//------------------------------------------
+	
 
 	printf("Time taken: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
 	cout << "-------END PROGRAM-------------"<< endl;
 
 }//end program
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+TChain *callOneFile(const char* TITLES){
+
+	TChain* chain = new TChain("analysis/data");
+	chain->Add(TITLES);
+	return chain;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+TChain *callTchain(const char* LOCAL){
+	//READING ALL THE ROOT FILE IN THE LOCAL FOLDER USING TCHAIN
+	const char *dirname = LOCAL; //Directory of the files 
+	const char *ext =".root"; //extenson of files you want add	
+	int added = 0;
+	TChain* chain = new TChain("analysis/data"); 
+   TSystemDirectory dir(dirname, dirname);
+   TList *files = dir.GetListOfFiles();
+	if (files) 
+	{
+      TSystemFile *file;
+      TString fname;
+      TIter next(files);
+      while ((file=(TSystemFile*)next())) 
+		{
+         fname = file->GetName();
+			if (fname.EndsWith(ext))
+			{	//cout << "File: "<< fname << endl; 
+				chain->Add(LOCAL+fname);
+				added++;}	       
+     }
+   }
+	cout << "======== " << added << " Files added"<< endl;
+	return chain;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+TH1* makeTH1(const char* name, Double_t BIN, Double_t NMIN, Double_t NMAX, const char* TITLES, Color_t COLOR) 
+{
+   //Create a TH1D (one dimension) histogram
+   TH1D* hh = new TH1D(name, name, BIN, NMIN, NMAX) ;
+	hh->SetTitle(TITLES); hh->SetMarkerStyle(7);
+	hh->SetFillColor(COLOR); hh->Sumw2();
+	//hh->Draw(TYPE); const char* TYPE
+   return hh ;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+TH1* makeTH1Rec(const char* name, const int nbins_low , double* nbins_high ){
+	
+	//Create a TH1D (one dimension) with alternatives bins
+	TH1D *hh = new TH1D(name, name, nbins_low, nbins_high);
+	hh->SetMarkerStyle(7); hh->Sumw2(); return hh ;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//TBranch* makeBranch(TTree *myTree, const char* name, std::vector<double>* VECTOR) 
+//{
+//	TBranch *branch = myTree->GetBranch(name);
+//	branch->SetAddress(&VECTOR);
+//	return branch ;
+//}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
