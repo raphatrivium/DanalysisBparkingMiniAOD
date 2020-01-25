@@ -28,6 +28,8 @@
 <use name="CondFormats/RunInfo"/>
 <use name="DataFormats/ParticleFlowCandidate"/>
 <use name="DataFormats/ParticleFlowReco"/>
+<use name="PhysicsTools/PatAlgos"/>
+<use name="PhysicsTools/PatUtils"/>
 <use name="rootmath"/>
 <use name="clhep"/>
 <use name="hepmc"/>

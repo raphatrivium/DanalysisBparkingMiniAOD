@@ -1,3 +1,3 @@
 python/*.root
 python/crab_projects/
-*afs*
+.*afs*

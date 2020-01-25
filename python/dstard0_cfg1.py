@@ -33,6 +33,19 @@ process.source = cms.Source("PoolSource",
 	   )
 )
 #===================================================================
+process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
+	vertexCollection = cms.InputTag('offlineSlimmedPrimaryVertices'),
+	minimumNDOF = cms.uint32(4) ,
+	maxAbsZ = cms.double(24), 
+	maxd0 = cms.double(2) 
+)
+
+#process.noscraping = cms.EDFilter("FilterOutScraping",
+#applyfilter = cms.untracked.bool(True),
+#debugOn = cms.untracked.bool(False),
+#numtrack = cms.untracked.uint32(10),
+#thresh = cms.untracked.double(0.25)
+#)
 
 process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	# Analysis
@@ -41,13 +54,15 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	bits = cms.InputTag("TriggerResults","","HLT"),
 	prescales = cms.InputTag("patTrigger"),#linked to pat::PackedTriggerPrescales
 	objects = cms.InputTag("selectedPatTrigger"),
-	#PathName = cms.untracked.string("HLT_Mu8p5_IP3p5_part0"), #triggerName
-	#PathName = cms.untracked.string("HLT_Mu12_IP6_part0"),  #triggerName
-	PathName = cms.untracked.string("HLT_Mu9_IP6"),  #triggerName	
+	PathName = cms.untracked.string("HLT_Mu9_IP6"),  #triggerName	HLT_Mu8_IP3 / HLT_Mu8p5_IP3p5 / HLT_Mu9_IP6 / HLT_Mu10p5_IP3p5
+	ReferencePathName = cms.untracked.string("HLT_Mu8_IP3"),
+	ReferencePathName2 = cms.untracked.string("HLT_Mu8p5_IP3p5"),
 	tracks = cms.InputTag('packedPFCandidates'),#linked to vector<pat::PackedCandidate
 	recVtxs = cms.InputTag('offlineSlimmedPrimaryVertices'), #linked to vector<reco::Vertex> 
 	gens = cms.InputTag("prunedGenParticles"), #linked to reco::GenParticleCollection
 	gensD0 = cms.InputTag("prunedGenParticles"), #linked to reco::GenParticleCollection
+	#Weight
+	PileupSumInfoInputTag = cms.InputTag("slimmedAddPileupInfo"),
 	# Options
 	comEnergy = cms.double(13000.),
 	#TTBIt = cms.int32(34),
@@ -55,11 +70,15 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	DstarSignificance3D = cms.double(3.),
 	D0Significance3D = cms.double(3.),
 	selectionCuts = cms.bool(False), #Apply Cuts Online
-	triggerOn = cms.bool(True) #Apply Trigger Selection
+	triggerOn = cms.bool(True), #Apply Trigger
+	triggerReferenceOn = cms.bool(False), #Apply Refernce Trigger
+	TracksOn = cms.bool(True)
 )
 
 process.TFileService = cms.Service("TFileService",
    fileName = cms.string('D0DstarDataBparking.root') #output files
 )
 
-process.p = cms.Path(process.analysis)
+#process.p = cms.Path(process.analysis)
+process.p = cms.Path(process.primaryVertexFilter+process.analysis)
+#process.p = cms.Path(process.primaryVertexFilter+process.noscraping+process.analysis)

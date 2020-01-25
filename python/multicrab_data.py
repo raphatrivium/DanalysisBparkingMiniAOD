@@ -19,7 +19,7 @@ config.JobType.pluginName = 'Analysis'
 #config.JobType.maxJobRuntimeMin = 60
 config.JobType.psetName = 'null' #'test_cfg-el.py'
 #config.JobType.maxMemoryMB = 760
-#config.JobType.inputFiles = ['alignment.xml','direct_simu_reco_cff.py','customisation_cff.py','PUHistos_data.root','PUHistos_mc.root']
+config.JobType.inputFiles = ['MyDataPileupHistogram.root','PileupMC.root']
 #config.JobType.outputFiles = ['output_HepMC.root', 'output_track_xy.root']
 
 config.section_('Data')
@@ -29,11 +29,11 @@ config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/
 config.Data.runRange = '314472-325175'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'LumiBased' #'FileBased' 'Automatic' 'FileBased' 'LumiBased' 'EventAwareLumiBased'
-config.Data.unitsPerJob = 50
+config.Data.unitsPerJob = 5
 #config.Data.totalUnits = 100
 #config.Data.outLFNDirBase = 'gsiftp://eosuserftp.cern.ch/eos/user/m/malvesga' #%s/' % (getUsernameFromSiteDB())
 config.Data.publication = False
-config.Data.outputDatasetTag = 'ParkingBPH_Run2018A_MINIAOD_HLT_Mu9_IP6'
+config.Data.outputDatasetTag = 'ParkingBPH_Run2018A_MINIAOD'
 
 config.section_('Site')
 config.Site.storageSite = 'T2_CH_CERNBOX' #'T2_CH_CERNBOX' 'T2_IT_Bari'
@@ -51,44 +51,44 @@ def submit(config):
 if __name__ == '__main__':
 
     config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking1_Run2018A_HLT_Mu9_IP6'
+    config.General.requestName = 'Bparking1_Run2018A'
     config.JobType.psetName = 'dstard0_cfg1.py'
     config.Data.inputDataset = '/ParkingBPH1/Run2018A-14May2018-v1/MINIAOD'
     config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
-    submit(config)	
+    submit(config)
 
     config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking2_Run2018A_HLT_Mu9_IP6'
+    config.General.requestName = 'Bparking2_Run2018A'
     config.JobType.psetName = 'dstard0_cfg1.py'
     config.Data.inputDataset = '/ParkingBPH2/Run2018A-14May2018-v1/MINIAOD'
     config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
     submit(config)
 
     config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking3_Run2018A_HLT_Mu9_IP6'
+    config.General.requestName = 'Bparking3_Run2018A'
     config.JobType.psetName = 'dstard0_cfg1.py'
     config.Data.inputDataset = '/ParkingBPH3/Run2018A-14May2018-v1/MINIAOD'
     config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
     submit(config)
 
     config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking4_Run2018A_HLT_Mu9_IP6'
+    config.General.requestName = 'Bparking4_Run2018A'
     config.JobType.psetName = 'dstard0_cfg1.py'
     config.Data.inputDataset = '/ParkingBPH4/Run2018A-14May2018-v1/MINIAOD'
     config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
     submit(config)
 
     config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking5_Run2018A_HLT_Mu9_IP6'
+    config.General.requestName = 'Bparking5_Run2018A'
     config.JobType.psetName = 'dstard0_cfg1.py'
     config.Data.inputDataset = '/ParkingBPH5/Run2018A-14May2018-v1/MINIAOD'
     config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
     submit(config)
 
     config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking6_Run2018A_HLT_Mu9_IP6'
+    config.General.requestName = 'Bparking6_Run2018A'
     config.JobType.psetName = 'dstard0_cfg1.py'
     config.Data.inputDataset = '/ParkingBPH6/Run2018A-14May2018-v1/MINIAOD'
     config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
     submit(config)
-       
+
