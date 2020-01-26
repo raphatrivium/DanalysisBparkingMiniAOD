@@ -200,10 +200,11 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 	//Weighting Gen
 	Handle<GenEventInfoProduct> hEventInfo;
-	iEvent.getByToken(mEventInfo_, hEventInfo);	
-	if (hEventInfo->hasBinningValues()) qEvtHdr.setPthat(hEventInfo->binningValues()[0]);
-   else qEvtHdr.setPthat(0);
-   qEvtHdr.setWeight(hEventInfo->weight());
+	iEvent.getByToken(mEventInfo_, hEventInfo);
+	cout << "hEventInfo->weight(): "<< hEventInfo->weight() << endl;
+	//if (hEventInfo->hasBinningValues()) qEvtHdr.setPthat(hEventInfo->binningValues()[0]);
+  // else qEvtHdr.setPthat(0);
+   //qEvtHdr.setWeight(hEventInfo->weight());
 	//mEvent->setEvtHdr(qEvtHdr);
 	
 	//Triggers
