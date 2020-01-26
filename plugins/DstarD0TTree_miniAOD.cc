@@ -205,6 +205,7 @@ void DstarD0TTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
    else qEvtHdr.setPthat(0);
    qEvtHdr.setWeight(hEventInfo->weight());
 	//mEvent->setEvtHdr(qEvtHdr);
+	cout << "hEventInfo->weight(): "<< hEventInfo->weight() << endl;
 	
 	//Triggers
 	Handle<edm::TriggerResults> triggerBits;
@@ -1480,8 +1481,8 @@ void DstarD0TTree::beginJob(){
 	data->Branch("D0eta",&D0eta);
 	data->Branch("D0phi",&D0phi);
 	data->Branch("Dseta",&Dseta);
-	data->Branch("Dsphi",&Dsphi);
 	data->Branch("D0pt",&D0pt);
+	data->Branch("Dsphi",&Dsphi);
 	data->Branch("Dspt",&Dspt);
 	data->Branch("DSDeltaR",&DSDeltaR);
 	data->Branch("TrkKmass",&TrkKmass);
