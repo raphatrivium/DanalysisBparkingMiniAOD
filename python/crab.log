@@ -444,3 +444,124 @@ DEBUG 2020-01-22 10:20:11.782 UTC: 	 Executing :
 DEBUG 2020-01-22 10:20:11.783 UTC: 	 Proxy lifetime 86355 secs is different from voms extension lifetime 86354 secs for proxy: /tmp/x509up_u112971
 DEBUG 2020-01-22 10:20:11.783 UTC: 	 Proxy valid for 23:59:14 hours
 DEBUG 2020-01-22 10:20:11.784 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2020-05-28 07:34:52.207 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-28 07:34:52.208 UTC: 	 Running on: Linux lxplus607.cern.ch 2.6.32-754.28.1.el6.x86_64 #1 SMP Thu Mar 12 13:39:11 CET 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-28 07:34:52.225 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-28 07:34:52.226 UTC: 	 Executing command: 'status'
+DEBUG 2020-05-28 07:34:52.228 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+ERROR 2020-05-28 07:34:52.432 UTC: 	 Error: /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_MinBias_Tracks is not a valid CRAB project directory.
+ERROR 2020-05-28 07:34:52.433 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/status.py", line 41, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 278, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 619, in validateOptions
+    raise ConfigurationException(msg)
+ConfigurationException: [91mError[0m: /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_MinBias_Tracks is not a valid CRAB project directory.
+INFO 2020-05-28 07:34:53.031 UTC: 	 Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab.log
+DEBUG 2020-05-28 07:36:21.247 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-28 07:36:21.247 UTC: 	 Running on: Linux lxplus607.cern.ch 2.6.32-754.28.1.el6.x86_64 #1 SMP Thu Mar 12 13:39:11 CET 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-28 07:36:21.262 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-28 07:36:21.262 UTC: 	 Executing command: 'submit'
+DEBUG 2020-05-28 07:36:21.304 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2020-05-28 07:36:21.305 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2020-05-28 07:37:01.385 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-28 07:37:01.386 UTC: 	 Running on: Linux lxplus607.cern.ch 2.6.32-754.28.1.el6.x86_64 #1 SMP Thu Mar 12 13:39:11 CET 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-28 07:37:01.409 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-28 07:37:01.409 UTC: 	 Executing command: 'checkusername'
+DEBUG 2020-05-28 07:37:01.409 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2020-05-28 07:37:01.417 UTC: 	 Checking credentials
+DEBUG 2020-05-28 07:37:01.417 UTC: 	 Proxy file /tmp/x509up_u112971 not found
+DEBUG 2020-05-28 07:37:01.417 UTC: 	 Creating new proxy for 172:00 hours with VO group '' and VO role 'NULL'.
+DEBUG 2020-05-28 07:37:08.345 UTC: 	 Executing : 
+ command : voms-proxy-init -voms cms:/cms -valid 172:00 -rfc
+ output : None
+ error: None
+ retcode : 1
+DEBUG 2020-05-28 07:37:08.954 UTC: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u112971 -timeleft
+ output : 
+ error: Proxy not found: /tmp/x509up_u112971 (No such file or directory)
+
+ retcode : 1
+ERROR 2020-05-28 07:37:08.954 UTC: 	 Error while checking proxy timeleft for /tmp/x509up_u112971
+DEBUG 2020-05-28 07:37:09.562 UTC: 	 Executing : 
+ command : env X509_USER_PROXY=/tmp/x509up_u112971 voms-proxy-info -fqan
+ output : 
+ error: Proxy not found: /tmp/x509up_u112971 (No such file or directory)
+
+ retcode : 1
+ERROR 2020-05-28 07:37:09.562 UTC: 	 Problems creating proxy.
+ERROR 2020-05-28 07:37:09.562 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 372, in __init__
+    self.handleProxy(proxyOptsSetPlace)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 452, in handleProxy
+    proxyOptsSetPlace = proxyOptsSetPlace)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/CredentialInteractions.py", line 211, in createNewVomsProxy
+    raise ProxyCreationException("Problems creating proxy.")
+ProxyCreationException: Problems creating proxy.
+INFO 2020-05-28 07:37:09.566 UTC: 	 Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab.log
+DEBUG 2020-05-28 07:41:00.078 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-28 07:41:00.079 UTC: 	 Running on: Linux lxplus607.cern.ch 2.6.32-754.28.1.el6.x86_64 #1 SMP Thu Mar 12 13:39:11 CET 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-28 07:41:00.095 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-28 07:41:00.095 UTC: 	 Executing command: 'submit'
+DEBUG 2020-05-28 07:41:00.136 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2020-05-28 07:41:00.137 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2020-05-28 13:31:22.513 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-28 13:31:22.513 UTC: 	 Running on: Linux lxplus600.cern.ch 2.6.32-754.29.2.el6.x86_64 #1 SMP Wed May 13 09:05:08 CEST 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-28 13:31:22.528 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-28 13:31:22.529 UTC: 	 Executing command: 'submit'
+DEBUG 2020-05-28 13:31:22.660 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2020-05-28 13:31:22.662 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2020-05-28 17:04:37.573 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-28 17:04:37.574 UTC: 	 Running on: Linux lxplus602.cern.ch 2.6.32-754.28.1.el6.x86_64 #1 SMP Thu Mar 12 13:39:11 CET 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-28 17:04:37.590 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-28 17:04:37.590 UTC: 	 Executing command: 'status'
+DEBUG 2020-05-28 17:04:37.590 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+ERROR 2020-05-28 17:04:37.591 UTC: 	 Cannot find .requestcache file in CRAB project directory /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_Official_Tracks
+ERROR 2020-05-28 17:04:37.592 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/status.py", line 41, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 278, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 623, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 485, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_Official_Tracks
+INFO 2020-05-28 17:04:37.602 UTC: 	 Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab.log
+DEBUG 2020-05-28 17:06:06.927 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-28 17:06:06.927 UTC: 	 Running on: Linux lxplus602.cern.ch 2.6.32-754.28.1.el6.x86_64 #1 SMP Thu Mar 12 13:39:11 CET 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-28 17:06:06.943 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-28 17:06:06.943 UTC: 	 Executing command: 'kill'
+DEBUG 2020-05-28 17:06:06.944 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+ERROR 2020-05-28 17:06:06.945 UTC: 	 Cannot find .requestcache file in CRAB project directory /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_Official_Tracks
+ERROR 2020-05-28 17:06:06.945 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 278, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 623, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005-bcolbf2/lib/CRABClient/Commands/SubCommand.py", line 485, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_Official_Tracks
+INFO 2020-05-28 17:06:06.947 UTC: 	 Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab.log

@@ -63,9 +63,6 @@
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
-#include "SMPJ/AnalysisFW/interface/QCDEventHdr.h"
-#include "SMPJ/AnalysisFW/interface/QCDEvent.h"
-
 //JetCollection (CaloTower) - Gapside
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
@@ -100,6 +97,10 @@
 
 #include <string>
 
+using namespace std; 
+using namespace reco;
+using namespace edm;
+
 //
 // class declaration
 //
@@ -126,6 +127,7 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		void assignStableDaughters(const reco::Candidate* p, std::vector<int> & pids);
 		bool TriggerInfo(const edm::Event&, edm::Handle<edm::TriggerResults>, edm::Handle<pat::PackedTriggerPrescales> ,TString trigname);
 		std::vector<std::string> TriggersFired(const edm::Event&, edm::Handle<edm::TriggerResults>, edm::Handle<pat::PackedTriggerPrescales>);
+		//void process_pileup(const edm::Event&, edm::LumiReWeighting, edm::EDGetTokenT<std::vector<PileupSummaryInfo>>);
 		void initialize();
 
 		// ----------member data ---------------------------
@@ -141,39 +143,40 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		//std::vector<reco::TransientTrack> t_tks;
 		//std::vector<reco::TransientTrack> tksD0;
 
+		//Creating a Tree
 		TTree *data;
 
 		//Weighting
-		edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PileupSumInfoInputTag_;
-		edm::LumiReWeighting *LumiWeights_;
+		edm::EDGetTokenT<std::vector<PileupSummaryInfo>> PileupSumInfoInputTag_;
+		edm::LumiReWeighting *LumiWeights_;	// Pile-up re-weighting components
+		//edm::LumiReWeighting LumiWeights_; 
 		edm::EDGetTokenT<GenEventInfoProduct> mEventInfo_;
-
-		
 
 		//Triggers
 		edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
 		edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone> > triggerObjects_;
 		edm::EDGetTokenT <pat::PackedTriggerPrescales> triggerPrescales_;
 
-		//MiniAOD
+		//Particle, Vertex and Generated Particle  Collection
 		edm::EDGetTokenT<edm::View<pat::PackedCandidate>> trkToken_; 
 		edm::EDGetTokenT<reco::VertexCollection> vtxToken_;
-
 		edm::EDGetTokenT<reco::GenParticleCollection> genParticlesTokenDstar_;
-		edm::EDGetTokenT<reco::GenParticleCollection> genParticlesTokenD0_;
-
-		
+		edm::EDGetTokenT<reco::GenParticleCollection> genParticlesTokenD0_;		
 		//edm::EDGetTokenT<reco::GenParticleCollection> genParticlesToken_;
 		//edm::EDGetTokenT<edm::View<reco::GenParticle> > genParticlesToken_;
 
+		//---------------------------------------------------------------
+		//Variables
+		//---------------------------------------------------------------
+		double c = 299792458; //Light speed [m/s]
+		
 		//std::vector<TString> NamesFiredTrigger;
 		//std::vector<std::vector<TString>> NameOfFiredTriggers;
 		std::vector<std::string> NameOfFiredTriggers;
 
-		QCDEvent *mEvent;
-
-		double PUWeight;
-		double nPU;
+		double GenWeight; // Gen weight factor
+		double PUWeight; // Pile-up re-weight factor
+		double nPU; 
 	
 		double Ebeam_, comEnergy_, DstarSignificance3D_ , D0Significance3D_;
 
@@ -205,7 +208,6 @@ class DstarD0TTree : public edm::EDAnalyzer {
 
 		std::vector<double> 	TracksCharge, TracksEta, TracksPt, TracksChi2, TracksNumberOfHits, TracksPhi,
 									TracksdxyError, TracksdzError, TracksNumberOfPixelHits, Tracksdxy, Tracksdz;
-
 		//----------------------------
 		//D* QUANTITIES
 		//----------------------------
@@ -229,8 +231,6 @@ class DstarD0TTree : public edm::EDAnalyzer {
 									Trkpiphi, TrkSphi, TrkScharge, D0fromDSsXY_vec,	D0fromDSs3D_vec, Anglephi_vec, 
 									D0fromDSd3D_vec, D0fromDSe3D_vec, D0Kpid3D_vec, D0Kpie3D_vec,
 									D0fromDSdXY_vec, D0fromDSeXY_vec, D0KpidXY_vec, D0KpieXY_vec; 
-									
-
 		//----------------------------
 		//D* QUANTITIES WRONG COMBINATION
 		//----------------------------
@@ -243,18 +243,16 @@ class DstarD0TTree : public edm::EDAnalyzer {
 									TrkpimassWrong, TrkSmassWrong, TrkSptWrong, TrkKetaWrong, TrkpietaWrong, 
 									TrkSetaWrong, TrkKphiWrong, TrkpiphiWrong, TrkSphiWrong, TrkSchargeWrong, 
 									D0fromDSsXY_vecWrong, D0fromDSs3D_vecWrong, Anglephi_vecWrong;
-
 		//----------------------------
 		//D* MC
 		//----------------------------
 		std::vector<double> 	MCDseta,MCDsphi,MCDspt,MCDsenergy,MCDsp,MCDset,MCDsrapidity,MCDsmass,
-		 							MCD0eta,MCD0phi,MCD0pt,MCD0energy,MCD0p,MCD0et,MCD0rapidity,MCD0mass,
+		 							MCD0eta,MCD0phi,MCD0pt,MCD0energy,MCD0p,MCD0et,MCD0rapidity,MCD0mass,MCD0displacement,MCD0lifetime,
 							 		MCDsKeta,MCDsKphi,MCDsKpt,MCDsKenergy,MCDsKp,MCDsKet,MCDsKrapidity,
 									MCDsKmass, MCDsPieta,MCDsPiphi,MCDsPipt, MCDsPienergy, MCDsPip, 
 									MCDsPiet, MCDsPirapidity, MCDsPimass, Dseta_vec, MCDseta_vec, 
 									Dsphi_vec, MCDsphi_vec, Dspt_vec, MCDspt_vec, D0fromDsmass_vec,
 									deltaRDs_vec;
-
 		//----------------------------
 		//D0 QUANTITIES
 		//----------------------------
@@ -265,13 +263,12 @@ class DstarD0TTree : public edm::EDAnalyzer {
 							CounterD0PromptTracksEta2p5, CounterD0PromptKpiAfterTransientp0;
 
 		bool comb1, comb2;
-		
-
 		//----------------------------
 		//D0 MC
 		//----------------------------			
 		std::vector<double> 	MCpromptD0eta, MCpromptD0phi, MCpromptD0pt, MCpromptD0energy, 
-									MCpromptD0p, MCpromptD0et, MCpromptD0rapidity, MCpromptD0mass,
+									MCpromptD0p, MCpromptD0et, MCpromptD0rapidity, MCpromptD0mass, 
+									MCpromptD0displacement, MCpromptD0lifetime,
 		 							MCpromptD0_Keta, MCpromptD0_Kphi, MCpromptD0_Kpt, MCpromptD0_Kenergy,
 		 							MCpromptD0_Kp, MCpromptD0_Ket, MCpromptD0_Krapidity, MCpromptD0_Kmass,
 		 							MCpromptD0_Pieta, MCpromptD0_Piphi, MCpromptD0_Pipt, MCpromptD0_Pienergy, 
@@ -280,9 +277,6 @@ class DstarD0TTree : public edm::EDAnalyzer {
 
 		std::vector<double> 	D0eta_vec, MCD0eta_vec, D0phi_vec, MCD0phi_vec, D0pt_vec, 
 									MCD0pt_vec, D0Kt_vec, D0Sxy_vec, D0OpAngle_vec, deltaRD0_vec;
-	
-		
-
 	
 };
 #endif 

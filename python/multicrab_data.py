@@ -50,12 +50,12 @@ def submit(config):
 
 if __name__ == '__main__':
 
-    config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking1_Run2018A'
-    config.JobType.psetName = 'dstard0_cfg1.py'
-    config.Data.inputDataset = '/ParkingBPH1/Run2018A-14May2018-v1/MINIAOD'
-    config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
-    submit(config)
+    #config.General.workArea = 'crab_projects'
+    #config.General.requestName = 'Bparking1_Run2018A'
+    #config.JobType.psetName = 'dstard0_cfg1.py'
+    #config.Data.inputDataset = '/ParkingBPH1/Run2018A-14May2018-v1/MINIAOD'
+    #config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
+    #submit(config)
 
     config.General.workArea = 'crab_projects'
     config.General.requestName = 'Bparking2_Run2018A'

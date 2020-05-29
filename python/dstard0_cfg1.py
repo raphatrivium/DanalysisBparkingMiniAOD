@@ -63,16 +63,17 @@ process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	gensD0 = cms.InputTag("prunedGenParticles"), #linked to reco::GenParticleCollection
 	#Weight
 	PileupSumInfoInputTag = cms.InputTag("slimmedAddPileupInfo"),
+	mEventInfo = cms.InputTag("generator"),
 	# Options
 	comEnergy = cms.double(13000.),
 	#TTBIt = cms.int32(34),
 	debug = cms.untracked.bool(False),
-	DstarSignificance3D = cms.double(3.),
-	D0Significance3D = cms.double(3.),
+	DstarSignificance3D = cms.double(3.0),
+	D0Significance3D = cms.double(3.0),
 	selectionCuts = cms.bool(False), #Apply Cuts Online
-	triggerOn = cms.bool(True), #Apply Trigger
-	triggerReferenceOn = cms.bool(False), #Apply Refernce Trigger
-	TracksOn = cms.bool(True)
+	triggerOn = cms.bool(False), #Apply Trigger
+	triggerReferenceOn = cms.bool(False), #Apply Reference Trigger
+	TracksOn = cms.bool(False)
 )
 
 process.TFileService = cms.Service("TFileService",
