@@ -967,12 +967,11 @@ void DstarD0TTree::GenDstarInfo(const edm::Event& iEvent,
 							MCD0rapidity.push_back(dau->rapidity());   
 							MCD0mass.push_back(dau->mass());
 							//Find D0 displacement and Lifetime
-							double D0L = sqrt( pow(dau->vx()-dau->daughter(0)->vx(),2) + 
-													 pow(dau->vy()-dau->daughter(0)->vy(),2) + 
-													 pow(dau->vz()-dau->daughter(0)->vz(),2));
-							double D0lifeTime = dau->mass() * D0L*pow(10,-2) / (c * dau->pt() );
-							//cout << "MC D0(fromD*) displacement[cm]: " << D0L << " # LifeTime [s]: " << D0lifeTime << endl;
-							MCD0displacement.push_back(D0L);   
+							double D0Lxy = sqrt( pow(dau->vx()-dau->daughter(0)->vx(),2) + 
+													   pow(dau->vy()-dau->daughter(0)->vy(),2) );
+							double D0lifeTime = dau->mass() * D0Lxy*pow(10,-2) / (c * dau->pt() );
+							//cout << "MC D0(fromD*) displacement-xy[cm]: " << D0Lxy << " # LifeTime [s]: " << D0lifeTime << endl;
+							MCD0dispXY.push_back(D0Lxy);   
 							MCD0lifetime.push_back(D0lifeTime);
 							//Kaon Quantities
 							MCDsKeta.push_back(dau->daughter(0)->eta());
@@ -1215,12 +1214,11 @@ void DstarD0TTree::GenD0Info(const edm::Event& iEvent,
 					double MCD0dispAngle = momentum.angle(MCdisplacement); 						
 					MCpromptD0_DispAngle.push_back(MCD0dispAngle);
 					//Find D0 displacement and Lifetime
-					double D0L = sqrt( pow(p.vx()-p.daughter(0)->vx(),2) + 
-											 pow(p.vy()-p.daughter(0)->vy(),2) + 
-											 pow(p.vz()-p.daughter(0)->vz(),2));
-					double D0lifeTime = p.mass() * D0L*pow(10,-2) / (c * p.pt() );
-					//cout << "MC D0 displacement[cm]: " << D0L << " # LifeTime [s]: " << D0lifeTime << endl;
-					MCpromptD0displacement.push_back(D0L);   
+					double D0Lxy = sqrt( pow(p.vx()-p.daughter(0)->vx(),2) + 
+											 	pow(p.vy()-p.daughter(0)->vy(),2) );
+					double D0lifeTime = p.mass() * D0Lxy*pow(10,-2) / (c * p.pt() );
+					//cout << "MC D0 displacement[cm]: " << D0Lxy << " # LifeTime [s]: " << D0lifeTime << endl;
+					MCpromptD0dispXY.push_back(D0Lxy);   
 					MCpromptD0lifetime.push_back(D0lifeTime);			
 					//Kaon Quantities
 					MCpromptD0_Keta.push_back(p.daughter(0)->eta());
@@ -1264,14 +1262,12 @@ void DstarD0TTree::GenD0Info(const edm::Event& iEvent,
 					double MCD0dispAngle = momentum.angle(MCdisplacement); 						
 					MCpromptD0_DispAngle.push_back(MCD0dispAngle);
 					//Find D0 displacement and Lifetime
-					double D0L = sqrt( pow(p.vx()-p.daughter(0)->vx(),2) + 
-											 pow(p.vy()-p.daughter(0)->vy(),2) + 
-											 pow(p.vz()-p.daughter(0)->vz(),2));
-					double D0lifeTime = p.mass() * D0L*pow(10,-2) / (c * p.pt() );
-					//cout << "MC D0 displacement[cm]: " << D0L << " # LifeTime [s]: " << D0lifeTime << endl;
-					MCpromptD0displacement.push_back(D0L);   
-					MCpromptD0lifetime.push_back(D0lifeTime);	
-
+					double D0Lxy = sqrt( pow(p.vx()-p.daughter(0)->vx(),2) + 
+											 	pow(p.vy()-p.daughter(0)->vy(),2) );
+					double D0lifeTime = p.mass() * D0Lxy*pow(10,-2) / (c * p.pt() );
+					//cout << "MC D0 displacement[cm]: " << D0Lxy << " # LifeTime [s]: " << D0lifeTime << endl;
+					MCpromptD0dispXY.push_back(D0Lxy);
+					MCpromptD0lifetime.push_back(D0lifeTime);
 					MCpromptD0_Keta.push_back(p.daughter(1)->eta());
 					MCpromptD0_Kphi.push_back(p.daughter(1)->phi());
 					MCpromptD0_Kpt.push_back(p.daughter(1)->pt());
@@ -1394,11 +1390,11 @@ void DstarD0TTree::initialize(){
 	//	D0KpisXY_.clear();
 	
 	MCDseta.clear(); MCDsphi.clear(); MCDspt.clear(); MCDsenergy.clear(); MCDsp.clear(); MCDset.clear(); MCDsrapidity.clear(); MCDsmass.clear(); 
-	MCD0eta.clear(); MCD0phi.clear(); MCD0pt.clear(); MCD0energy.clear(); MCD0p.clear(); MCD0et.clear(); MCD0rapidity.clear(); MCD0mass.clear(); MCD0displacement.clear(); MCD0lifetime.clear();
+	MCD0eta.clear(); MCD0phi.clear(); MCD0pt.clear(); MCD0energy.clear(); MCD0p.clear(); MCD0et.clear(); MCD0rapidity.clear(); MCD0mass.clear(); MCD0dispXY.clear(); MCD0lifetime.clear();
 	MCDsKeta.clear(); MCDsKphi.clear(); MCDsKpt.clear(); MCDsKenergy.clear(); MCDsKp.clear(); MCDsKet.clear(); MCDsKrapidity.clear(); MCDsKmass.clear();
 	MCDsPieta.clear(); MCDsPiphi.clear(); MCDsPipt.clear(); MCDsPienergy.clear(); MCDsPip.clear(); MCDsPiet.clear(); MCDsPirapidity.clear(); MCDsPimass.clear(); 
 		
-	MCpromptD0eta.clear(); MCpromptD0phi.clear(); MCpromptD0pt.clear(); MCpromptD0energy.clear(); MCpromptD0p.clear(); MCpromptD0et.clear(); MCpromptD0rapidity.clear(); MCpromptD0mass.clear(); MCpromptD0displacement.clear(); MCpromptD0lifetime.clear();
+	MCpromptD0eta.clear(); MCpromptD0phi.clear(); MCpromptD0pt.clear(); MCpromptD0energy.clear(); MCpromptD0p.clear(); MCpromptD0et.clear(); MCpromptD0rapidity.clear(); MCpromptD0mass.clear(); MCpromptD0dispXY.clear(); MCpromptD0lifetime.clear();
 	MCpromptD0_Keta.clear(); MCpromptD0_Kphi.clear(); MCpromptD0_Kpt.clear(); MCpromptD0_Kenergy.clear(); MCpromptD0_Kp.clear(); MCpromptD0_Ket.clear(); MCpromptD0_Krapidity.clear(); MCpromptD0_Kmass.clear();
 	MCpromptD0_Pieta.clear(); MCpromptD0_Piphi.clear(); MCpromptD0_Pipt.clear(); MCpromptD0_Pienergy.clear(); MCpromptD0_Pip.clear(); MCpromptD0_Piet.clear(); MCpromptD0_Pirapidity.clear(); MCpromptD0_Pimass.clear();
 	MCpromptD0_DispAngle.clear(); MCpromptD0_Kt.clear();
@@ -1683,7 +1679,7 @@ void DstarD0TTree::beginJob(){
 	data->Branch("MCD0et",&MCD0et);
 	data->Branch("MCD0rapidity",&MCD0rapidity);
 	data->Branch("MCD0mass",&MCD0mass);
-	data->Branch("MCD0displacement",&MCD0displacement);
+	data->Branch("MCD0dispXY",&MCD0dispXY);
 	data->Branch("MCD0lifetime",&MCD0lifetime);
 
 	data->Branch("MCDsKphi",&MCDsKphi);
@@ -1713,7 +1709,7 @@ void DstarD0TTree::beginJob(){
 	data->Branch("MCpromptD0et",&MCpromptD0et);
 	data->Branch("MCpromptD0rapidity",&MCpromptD0rapidity);
 	data->Branch("MCpromptD0mass",&MCpromptD0mass);
-	data->Branch("MCpromptD0displacement",&MCpromptD0displacement);
+	data->Branch("MCpromptD0dispXY",&MCpromptD0dispXY);
 	data->Branch("MCpromptD0lifetime",&MCpromptD0lifetime);
 	data->Branch("MCpromptD0_DispAngle",&MCpromptD0_DispAngle);
 

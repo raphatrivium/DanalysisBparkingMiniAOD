@@ -247,7 +247,7 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		//D* MC
 		//----------------------------
 		std::vector<double> 	MCDseta,MCDsphi,MCDspt,MCDsenergy,MCDsp,MCDset,MCDsrapidity,MCDsmass,
-		 							MCD0eta,MCD0phi,MCD0pt,MCD0energy,MCD0p,MCD0et,MCD0rapidity,MCD0mass,MCD0displacement,MCD0lifetime,
+		 							MCD0eta,MCD0phi,MCD0pt,MCD0energy,MCD0p,MCD0et,MCD0rapidity,MCD0mass,MCD0dispXY,MCD0lifetime,
 							 		MCDsKeta,MCDsKphi,MCDsKpt,MCDsKenergy,MCDsKp,MCDsKet,MCDsKrapidity,
 									MCDsKmass, MCDsPieta,MCDsPiphi,MCDsPipt, MCDsPienergy, MCDsPip, 
 									MCDsPiet, MCDsPirapidity, MCDsPimass, Dseta_vec, MCDseta_vec, 
@@ -268,7 +268,7 @@ class DstarD0TTree : public edm::EDAnalyzer {
 		//----------------------------			
 		std::vector<double> 	MCpromptD0eta, MCpromptD0phi, MCpromptD0pt, MCpromptD0energy, 
 									MCpromptD0p, MCpromptD0et, MCpromptD0rapidity, MCpromptD0mass, 
-									MCpromptD0displacement, MCpromptD0lifetime,
+									MCpromptD0dispXY, MCpromptD0lifetime,
 		 							MCpromptD0_Keta, MCpromptD0_Kphi, MCpromptD0_Kpt, MCpromptD0_Kenergy,
 		 							MCpromptD0_Kp, MCpromptD0_Ket, MCpromptD0_Krapidity, MCpromptD0_Kmass,
 		 							MCpromptD0_Pieta, MCpromptD0_Piphi, MCpromptD0_Pipt, MCpromptD0_Pienergy, 
