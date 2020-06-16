@@ -565,3 +565,15 @@ Traceback (most recent call last):
     raise ex
 CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab_projects/crab_Ds_MC_Run2018A_Official_Tracks
 INFO 2020-05-28 17:06:06.947 UTC: 	 Log file is /afs/cern.ch/work/r/ragomesd/B_parking/CMSSW_10_2_7/src/BanalysisMiniAOD-1/DanalysisBparkingMiniAOD/python/crab.log
+DEBUG 2020-05-30 04:01:34.262 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-30 04:01:34.262 UTC: 	 Running on: Linux lxplus602.cern.ch 2.6.32-754.28.1.el6.x86_64 #1 SMP Thu Mar 12 13:39:11 CET 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-30 04:01:34.275 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-30 04:01:34.276 UTC: 	 Executing command: 'submit'
+DEBUG 2020-05-30 04:01:34.350 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2020-05-30 04:01:34.351 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+DEBUG 2020-05-30 04:01:34.397 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-05-30 04:01:34.397 UTC: 	 Running on: Linux lxplus602.cern.ch 2.6.32-754.28.1.el6.x86_64 #1 SMP Thu Mar 12 13:39:11 CET 2020 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux CERN SLC release 6.10 (Carbon)
+DEBUG 2020-05-30 04:01:34.411 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-05-30 04:01:34.411 UTC: 	 Executing command: 'submit'
+DEBUG 2020-05-30 04:01:34.412 UTC: 	 Found CRAB cache file /afs/cern.ch/user/r/ragomesd/.crab3
+DEBUG 2020-05-30 04:01:34.413 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).

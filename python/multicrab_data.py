@@ -50,45 +50,10 @@ def submit(config):
 
 if __name__ == '__main__':
 
-    #config.General.workArea = 'crab_projects'
-    #config.General.requestName = 'Bparking1_Run2018A'
-    #config.JobType.psetName = 'dstard0_cfg1.py'
-    #config.Data.inputDataset = '/ParkingBPH1/Run2018A-14May2018-v1/MINIAOD'
-    #config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
-    #submit(config)
-
     config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking2_Run2018A'
+    config.General.requestName = 'Bparking1_Run2018A'
     config.JobType.psetName = 'dstard0_cfg1.py'
-    config.Data.inputDataset = '/ParkingBPH2/Run2018A-14May2018-v1/MINIAOD'
-    config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
-    submit(config)
-
-    config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking3_Run2018A'
-    config.JobType.psetName = 'dstard0_cfg1.py'
-    config.Data.inputDataset = '/ParkingBPH3/Run2018A-14May2018-v1/MINIAOD'
-    config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
-    submit(config)
-
-    config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking4_Run2018A'
-    config.JobType.psetName = 'dstard0_cfg1.py'
-    config.Data.inputDataset = '/ParkingBPH4/Run2018A-14May2018-v1/MINIAOD'
-    config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
-    submit(config)
-
-    config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking5_Run2018A'
-    config.JobType.psetName = 'dstard0_cfg1.py'
-    config.Data.inputDataset = '/ParkingBPH5/Run2018A-14May2018-v1/MINIAOD'
-    config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
-    submit(config)
-
-    config.General.workArea = 'crab_projects'
-    config.General.requestName = 'Bparking6_Run2018A'
-    config.JobType.psetName = 'dstard0_cfg1.py'
-    config.Data.inputDataset = '/ParkingBPH6/Run2018A-14May2018-v1/MINIAOD'
+    config.Data.inputDataset = '/ParkingBPH1/Run2018A-14May2018-v1/MINIAOD'
     config.Data.outLFNDirBase = '/store/user/ragomesd/crab'
     submit(config)
 
