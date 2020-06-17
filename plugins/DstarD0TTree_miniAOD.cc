@@ -408,7 +408,7 @@ void DstarD0TTree::analyze(const edm::Event& iEvent,
 	RecDstarWrongCombination(iEvent,iSetup,RecVtx); //Reconstruction of D* with wrong charge combination (for BG model)
 	GenDstarInfo(iEvent,iSetup); //Stores information from D0 and its products.
 	GenDstarMesonBInfo(iEvent,iSetup);
-	//RecD0(iEvent,iSetup,RecVtx); //Reconstruction of prompt D0
+	RecD0(iEvent,iSetup,RecVtx); //Reconstruction of prompt D0
 	GenD0Info(iEvent,iSetup); //Stores information from D0 and its products.
 	GenD0MesonBInfo(iEvent,iSetup);
 	//FindAngle(RecVtx,v_D0,d0kpi_p4); //Calculates the opening angle
@@ -496,8 +496,8 @@ std::vector<std::string> DstarD0TTree::TriggersFired(const edm::Event& iEvent,
 void DstarD0TTree::RecDstar(const edm::Event& iEvent, 
 									 const edm::EventSetup& iSetup, 
 									 const reco::Vertex& RecVtx){
-   //cout << " RecDstar using goodTracks is " << goodTracks.size() << endl;
-	for(size_t i=0;i<goodTracks.size();i++)
+   if( goodTracks.size() >=2 ){
+	for(size_t i=0; i<(goodTracks.size()-1);i++)
 	{  
 		TransientTrack trk1 = goodTracks[i];
 		for(size_t j=i+1;j<goodTracks.size();j++)
@@ -682,14 +682,15 @@ void DstarD0TTree::RecDstar(const edm::Event& iEvent,
 	 } 
 	if(NKpiCand>999) break;
 	}
+	}
 }//End RecDstar
 
 //***********************************************************************************
 void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent,
 														  const edm::EventSetup& iSetup, 
 														  const reco::Vertex& RecVtx){	
-   //cout << " RecDstar using goodTracks is " << goodTracks.size() << endl;
-	for(size_t i=0;i<goodTracks.size();i++)
+   if( goodTracks.size() >=2 ){
+	for(size_t i=0;i<(goodTracks.size()-1);i++)
 	{  
 		TransientTrack trk1 = goodTracks[i];
 
@@ -880,7 +881,7 @@ void DstarD0TTree::RecDstarWrongCombination(const edm::Event& iEvent,
 	 } 
 	if(NKpiCand>999) break;
 	}
-
+	} //Protection
 }//RecDstarWrongCombination
 
 //***********************************************************************************
@@ -1101,7 +1102,8 @@ void DstarD0TTree::GenDstarMesonBInfo(const edm::Event& iEvent,
 //***********************************************************************************
 void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Vertex& RecVtx){
 
-	for(size_t i = 0; i < goodTracksD0.size(); i++)
+	if( goodTracksD0.size() >= 2 ) {
+	for(size_t i = 0; i < (goodTracksD0.size()-1); i++)
 	{
 		TransientTrack trk1D0 = goodTracksD0[i];
 		for(size_t j=i+1;j<goodTracksD0.size();j++)
@@ -1112,159 +1114,134 @@ void DstarD0TTree::RecD0(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			if(trk1D0 == trk2D0) continue;
 			if(trk1D0.charge() == trk2D0.charge()) continue;
 
-			//Recosntruction of D0 momentum
-			math::XYZVector D0_p = trk1D0.track().momentum() + trk2D0.track().momentum();
-
 			//TransientTrack KfromD0 = 0, PifromD0 = 0;	
 			TransientTrack KfromD0, PifromD0;	        
             			
-			mass1 = mass2 = 0. ;	
+			mass1 = 0.;
 			//Reconstructio of 4-vector D0 Prompt for track1 = Kaon and track2 = pion
-			math::XYZTLorentzVector vD0kaon1(trk1D0.track().px(),
-															trk1D0.track().py(),
-															trk1D0.track().pz(),
-															sqrt(pow(trk1D0.track().p(),2)+pow(k_mass,2)) );
-			math::XYZTLorentzVector vD0pion1(	trk2D0.track().px(),
-															trk2D0.track().py(),
-															trk2D0.track().pz(),
-															sqrt(pow(trk2D0.track().p(),2)+pow(pi_mass,2)) );        
-			math::XYZTLorentzVector vD0_1 = vD0kaon1 + vD0pion1;
-			mass1 = vD0_1.M();
+			math::XYZTLorentzVector vD0_1(trk1D0.track().px(),
+											trk1D0.track().py(),
+											trk1D0.track().pz(),
+											sqrt(pow(trk1D0.track().p(),2)+pow(k_mass,2)) );
+			math::XYZTLorentzVector vD0_2(trk2D0.track().px(),
+									trk2D0.track().py(),
+									trk2D0.track().pz(),
+									sqrt(pow(trk2D0.track().p(),2)+pow(pi_mass,2)) );        
 
-			//Reconstructio of 4-vector D0 Prompt for track1 = Kaon and track2 = pion
-			math::XYZTLorentzVector vD0pion2(trk1D0.track().px(),
-															trk1D0.track().py(),
-															trk1D0.track().pz(),
-															sqrt(pow(trk1D0.track().p(),2)+pow(k_mass,2)) );
-			math::XYZTLorentzVector vD0kaon2(	trk2D0.track().px(),
-															trk2D0.track().py(),
-															trk2D0.track().pz(),
-															sqrt(pow(trk2D0.track().p(),2)+pow(pi_mass,2)) );        
-			math::XYZTLorentzVector vD0_2 = vD0pion2 + vD0kaon2;
-			mass2 = vD0_2.M();
+			math::XYZTLorentzVector vD0 = vD0_1 + vD0_2;
+			mass1 = vD0.M();
 
-			comb1 = comb2 = false ;
-			if( fabs(mass1-1.86484) < 0.2) {comb1 = true;}		
-			if( fabs(mass2-1.86484) < 0.2) {comb2 = true;}
+			if( fabs(mass1-1.86484) > 0.2) continue;
 
-			//=============================
-			// tracks combinations						
-			for( int icomb = 0; icomb < 3; icomb++) 
-			{	//Combination 1
-				if (icomb == 0 and comb1 and !comb2){KfromD0 = trk1D0; PifromD0 = trk2D0;}
-				//Combination 2
-				else if (icomb == 1 and comb2 and !comb1)	{KfromD0 = trk2D0; PifromD0 = trk1D0;}
-				//Combination 1 and 2
-				else if (icomb == 2 and comb1 and comb2)		
-				{ 	if( fabs(mass1-1.864) < fabs(mass2-1.864) ){KfromD0 = trk1D0; PifromD0 = trk2D0;}
-					else{KfromD0 = trk2D0; PifromD0 = trk1D0;} }		
-				else continue;
+			// tracks combinations	
+			if( vD0_1.M() > vD0_2.M() ) {KfromD0 = trk1D0; PifromD0 = trk2D0;}
+			else {KfromD0 = trk2D0; PifromD0 = trk1D0;} 
 
-				CounterD0PromptminusPDG1p0++;
-				math::XYZVector K_p = trk2D0.track().momentum();
+			CounterD0PromptminusPDG1p0++;
 
-				//KalmanVertexFitter
-				vector<TransientTrack> tksD0;
-				tksD0.push_back(KfromD0);
-				tksD0.push_back(PifromD0);
-				KalmanVertexFitter kalman(true);
-				TransientVertex v_D0 = kalman.vertex(tksD0);
-				if(!v_D0.isValid() || !v_D0.hasRefittedTracks()) continue;
+			//KalmanVertexFitter
+			vector<TransientTrack> tksD0;
+			tksD0.push_back(KfromD0);
+			tksD0.push_back(PifromD0);
+			KalmanVertexFitter kalman(true);
+			TransientVertex v_D0 = kalman.vertex(tksD0);
+			if(!v_D0.isValid() || !v_D0.hasRefittedTracks()) continue;
 
-				//Vertex Probability
-				double D0KpivtxProb =TMath::Prob( (Double_t) v_D0.totalChiSquared(), (Int_t) v_D0.degreesOfFreedom());
+			//Vertex Probability
+			double D0KpivtxProb =TMath::Prob( (Double_t) v_D0.totalChiSquared(), (Int_t) v_D0.degreesOfFreedom());
 
-				TransientTrack KfromD0_f = v_D0.refittedTrack(KfromD0);
-				TransientTrack pifromD0_f = v_D0.refittedTrack(PifromD0);
-				CounterD0PromptKpiAfterTransientp0++;
+			TransientTrack KfromD0_f = v_D0.refittedTrack(KfromD0);
+			TransientTrack pifromD0_f = v_D0.refittedTrack(PifromD0);
+			CounterD0PromptKpiAfterTransientp0++;
 
-				//SV Confidence Level
-				if(D0KpivtxProb < 0.01) continue;
-				CounterD0PromptSVConfidenceLevel++;
+			//SV Confidence Level
+			if(D0KpivtxProb < 0.01) continue;
+			CounterD0PromptSVConfidenceLevel++;
 
-				//D* 4-momentum Reconstruction after KalmanVertexFitter		
-				math::XYZTLorentzVector p4_KfromD0( KfromD0_f.track().px(),
-																KfromD0_f.track().py(),
-																KfromD0_f.track().pz(),
-																sqrt(pow(KfromD0_f.track().p(),2)+pow(k_mass,2))  );
-				math::XYZTLorentzVector p4_pifromD0(pifromD0_f.track().px(),
-																pifromD0_f.track().py(),
-																pifromD0_f.track().pz(),
-																sqrt(pow(pifromD0_f.track().p(),2)+pow(pi_mass,2)) );  
-				math::XYZTLorentzVector d0kpi_p4 = p4_KfromD0 + p4_pifromD0;
-				double d0kpimass = d0kpi_p4.M();
+			//D* 4-momentum Reconstruction after KalmanVertexFitter		
+			math::XYZTLorentzVector p4_KfromD0( KfromD0_f.track().px(),
+															KfromD0_f.track().py(),
+															KfromD0_f.track().pz(),
+															sqrt(pow(KfromD0_f.track().p(),2)+pow(k_mass,2))  );
+			math::XYZTLorentzVector p4_pifromD0(pifromD0_f.track().px(),
+															pifromD0_f.track().py(),
+															pifromD0_f.track().pz(),
+															sqrt(pow(pifromD0_f.track().p(),2)+pow(pi_mass,2)) );  
+			math::XYZTLorentzVector d0kpi_p4 = p4_KfromD0 + p4_pifromD0;
+			double d0kpimass = d0kpi_p4.M();
 
-				//Angle between formation and decay of D0
-				double dispAngle = FindAngle(RecVtx,v_D0,d0kpi_p4);
-				double D0cosPhi = cos(dispAngle);
-				if( D0cosPhi < 0.99 ) continue;
-				CounterD0PromptPointingcosPhi++;
-				
-				//D0 Significance
-				VertexDistanceXY vD0KpidXY ;			
-				double D0KpidXY = vD0KpidXY.distance(RecVtx,v_D0).value() ;
-				double D0KpieXY = vD0KpidXY.distance(RecVtx,v_D0).error() ;
-				double D0KpisXY = D0KpidXY / D0KpieXY;
-
-				//D0 significance 3D
-				VertexDistance3D vD0Kpid3D ;
-				double D0Kpid3D = vD0Kpid3D.distance(RecVtx,v_D0).value() ;
-				double D0Kpie3D = vD0Kpid3D.distance(RecVtx,v_D0).error() ;
-				double D0Kpis3D = D0Kpid3D / D0Kpie3D;
-
-				if(selectionCuts) {if( D0Kpis3D < D0Significance3D_ ) continue;}
-				if(selectionCuts) {CounterD0PromptSignificance3D++;}
-				
-				//Vetorial product of 4-momentum Kaon and 4-momentum D0
-				double D0_kT = sqrt( (K_p).Cross(D0_p).Mag2() / D0_p.Mag2() ) ;
-				
-				if(selectionCuts) {if(fabs(d0kpimass - 1.86484)>0.15) continue;}
-				if(selectionCuts) {CounterD0PromptCandidates++;}
-				
-				ND0KpiCand++;
-
-				D0Kpi_VtxProb.push_back(D0KpivtxProb);
-				D0Kpimass.push_back(d0kpi_p4.M());
-				D0Kpipt.push_back(d0kpi_p4.Pt());
-				D0Kpieta.push_back(d0kpi_p4.eta());
-				D0Kpiphi.push_back(d0kpi_p4.phi());
-
-				D0Kpi_VtxPosx.push_back(v_D0.position().x());
-				D0Kpi_VtxPosy.push_back(v_D0.position().y());
-				D0Kpi_VtxPosz.push_back(v_D0.position().z());
-				D0Kpi_Vtxerrx.push_back(v_D0.positionError().cxx());
-				D0Kpi_Vtxerry.push_back(v_D0.positionError().cyy());
-				D0Kpi_Vtxerrz.push_back(v_D0.positionError().czz());
-				D0Kpi_DispAngle.push_back(D0cosPhi);
-				TrkD0Kdxy.push_back(KfromD0_f.track().dxy(RecVtx.position()));
-				TrkD0pidxy.push_back(pifromD0_f.track().dxy(RecVtx.position()));
-
-				TrkD0Kdz.push_back(KfromD0_f.track().dz(RecVtx.position()));
-				TrkD0Knhits.push_back(KfromD0.track().numberOfValidHits());
-				TrkD0Kchi2.push_back(KfromD0.track().normalizedChi2());
-				TrkD0Kpt.push_back(KfromD0_f.track().pt());
-				TrkD0Keta.push_back(KfromD0_f.track().eta());
-				TrkD0Kphi.push_back(KfromD0_f.track().phi());
-
-				TrkD0pidz.push_back(pifromD0_f.track().dz(RecVtx.position()));
-				TrkD0pinhits.push_back(PifromD0.track().numberOfValidHits());
-				TrkD0pichi2.push_back(PifromD0.track().normalizedChi2());
-				TrkD0pipt.push_back(pifromD0_f.track().pt());
-				TrkD0pieta.push_back(pifromD0_f.track().eta());
-				TrkD0piphi.push_back(pifromD0_f.track().phi());
-
-				D0KpisXY_vec.push_back(D0KpisXY);
-				D0KpidXY_vec.push_back(D0KpidXY);
-				D0KpieXY_vec.push_back(D0KpieXY);  
-				D0Kpis3D_vec.push_back(D0Kpis3D);
-				D0Kpid3D_vec.push_back(D0Kpid3D);
-				D0Kpie3D_vec.push_back(D0Kpie3D);
-				D0_kT_vec.push_back(D0_kT);	
+			//Angle between formation and decay of D0
+			double dispAngle = FindAngle(RecVtx,v_D0,d0kpi_p4);
+			double D0cosPhi = cos(dispAngle);
+			if( D0cosPhi < 0.99 ) continue;
+			CounterD0PromptPointingcosPhi++;
 			
-			}//end Combinations
+			//D0 Significance
+			VertexDistanceXY vD0KpidXY ;			
+			double D0KpidXY = vD0KpidXY.distance(RecVtx,v_D0).value() ;
+			double D0KpieXY = vD0KpidXY.distance(RecVtx,v_D0).error() ;
+			double D0KpisXY = D0KpidXY / D0KpieXY;
+
+			//D0 significance 3D
+			VertexDistance3D vD0Kpid3D ;
+			double D0Kpid3D = vD0Kpid3D.distance(RecVtx,v_D0).value() ;
+			double D0Kpie3D = vD0Kpid3D.distance(RecVtx,v_D0).error() ;
+			double D0Kpis3D = D0Kpid3D / D0Kpie3D;
+
+			if(selectionCuts) {if( D0Kpis3D < D0Significance3D_ ) continue;}
+			if(selectionCuts) {CounterD0PromptSignificance3D++;}
+			
+			// Kaon momentum
+			math::XYZVector K_p = trk2D0.track().momentum();
+			// D0 momentum
+			math::XYZVector D0_p = trk1D0.track().momentum() + trk2D0.track().momentum();			
+			//Vetorial product of 4-momentum Kaon and 4-momentum D0
+			double D0_kT = sqrt( (K_p).Cross(D0_p).Mag2() / D0_p.Mag2() ) ;
+			
+			if(selectionCuts) {if(fabs(d0kpimass - 1.86484)>0.15) continue;}
+			if(selectionCuts) {CounterD0PromptCandidates++;}
+			
+			D0Kpi_VtxProb.push_back(D0KpivtxProb);
+			D0Kpimass.push_back(d0kpi_p4.M());
+			D0Kpipt.push_back(d0kpi_p4.Pt());
+			D0Kpieta.push_back(d0kpi_p4.eta());
+			D0Kpiphi.push_back(d0kpi_p4.phi());
+
+			D0Kpi_VtxPosx.push_back(v_D0.position().x());
+			D0Kpi_VtxPosy.push_back(v_D0.position().y());
+			D0Kpi_VtxPosz.push_back(v_D0.position().z());
+			D0Kpi_Vtxerrx.push_back(v_D0.positionError().cxx());
+			D0Kpi_Vtxerry.push_back(v_D0.positionError().cyy());
+			D0Kpi_Vtxerrz.push_back(v_D0.positionError().czz());
+			D0Kpi_DispAngle.push_back(D0cosPhi);
+			TrkD0Kdxy.push_back(KfromD0_f.track().dxy(RecVtx.position()));
+			TrkD0pidxy.push_back(pifromD0_f.track().dxy(RecVtx.position()));
+
+			TrkD0Kdz.push_back(KfromD0_f.track().dz(RecVtx.position()));
+			TrkD0Knhits.push_back(KfromD0.track().numberOfValidHits());
+			TrkD0Kchi2.push_back(KfromD0.track().normalizedChi2());
+			TrkD0Kpt.push_back(KfromD0_f.track().pt());
+			TrkD0Keta.push_back(KfromD0_f.track().eta());
+			TrkD0Kphi.push_back(KfromD0_f.track().phi());
+
+			TrkD0pidz.push_back(pifromD0_f.track().dz(RecVtx.position()));
+			TrkD0pinhits.push_back(PifromD0.track().numberOfValidHits());
+			TrkD0pichi2.push_back(PifromD0.track().normalizedChi2());
+			TrkD0pipt.push_back(pifromD0_f.track().pt());
+			TrkD0pieta.push_back(pifromD0_f.track().eta());
+			TrkD0piphi.push_back(pifromD0_f.track().phi());
+
+			D0KpisXY_vec.push_back(D0KpisXY);
+			D0KpidXY_vec.push_back(D0KpidXY);
+			D0KpieXY_vec.push_back(D0KpieXY);  
+			D0Kpis3D_vec.push_back(D0Kpis3D);
+			D0Kpid3D_vec.push_back(D0Kpid3D);
+			D0Kpie3D_vec.push_back(D0Kpie3D);
+			D0_kT_vec.push_back(D0_kT);
+					
 		}//second track loop
 	}//first track loop
-
+} // protection
 } //END OF RECD0 
 
 //***********************************************************************************
@@ -1390,8 +1367,8 @@ void DstarD0TTree::GenD0MesonBInfo(const edm::Event& iEvent,
 				MCD0B_D0mass.push_back(dau->mass());
 				//Find angle between Primary and Secondary Vertex
 				CLHEP::Hep3Vector MCdisplacement(p.mother(0)->vx() - p.vx(), 
-													p.mother(0)->vy() - p.vy(), 
-													p.mother(0)->vz() - p.vz() );
+															p.mother(0)->vy() - p.vy(), 
+															p.mother(0)->vz() - p.vz() );
 				CLHEP::Hep3Vector momentum( p.px(), p.py(), p.pz() );
 				double MCD0dispAngle = momentum.angle(MCdisplacement); 						
 				MCD0B_D0DispAngle.push_back(MCD0dispAngle);
@@ -1457,7 +1434,7 @@ void DstarD0TTree::initialize(){
 
 	//D0 Conters
 	CounterTracksPt0p8 = 0; CounterD0PromptTracksEta2p5 = 0; CounterD0PromptTracksChi5 =0; CounterD0PromptTracksNumberHits5 = 0;
-	CounterD0PromptTracksPixelHits2 = 0; CounterD0PromptTracksDxy0p1 = 0; CounterD0PromptTracksDz0p5 =0; CounterTracksD0combination = 0; CounterD0PromptminusPDG1p0 = 0; CounterD0PromptKpiAfterTransientp0 =0; CounterD0PromptSVConfidenceLevel = 0; CounterD0PromptPointingcosPhi = 0; CounterD0PromptSignificance3D =0; CounterD0PromptCandidates = 0; ND0KpiCand = 0;
+	CounterD0PromptTracksPixelHits2 = 0; CounterD0PromptTracksDxy0p1 = 0; CounterD0PromptTracksDz0p5 =0; CounterTracksD0combination = 0; CounterD0PromptminusPDG1p0 = 0; CounterD0PromptKpiAfterTransientp0 =0; CounterD0PromptSVConfidenceLevel = 0; CounterD0PromptPointingcosPhi = 0; CounterD0PromptSignificance3D =0; CounterD0PromptCandidates = 0;
 	
 	CounterD0AfterLorentzVector = 0; CounterD0MinusPDGzero2 = 0; CounterDsMinusD0Zerothree = 0; CounterTransientTrackOfpiK = 0; CounterSVConfidenceLevel = 0; CounterD0AfterLorentzVectorKarman = 0; CounterPointingcosPhi = 0;	CounterSignificance3D = 0; CounterD0pTThree = 0; CounterDsAfterLorentzVector = 0; CounterD0MinusPDG = 0; CounterDsMinusD0 = 0;
 
@@ -1467,7 +1444,7 @@ void DstarD0TTree::initialize(){
 	//----------------------------
 	D0_VtxProbWrong.clear(); D0massWrong.clear(); TrkKmassWrong.clear(); TrkpimassWrong.clear();  TrkSmassWrong.clear(); DsmassWrong.clear(); D0ptWrong.clear(); DsptWrong.clear();D0etaWrong.clear(); D0phiWrong.clear(); DsetaWrong.clear(); DsphiWrong.clear(); D0_VtxPosxWrong.clear(); D0_VtxPosyWrong.clear(); D0_VtxPoszWrong.clear(); D0_VtxerrxWrong.clear(); D0_VtxerryWrong.clear(); D0_VtxerrzWrong.clear(); TrkKdxyWrong.clear(); TrkpidxyWrong.clear(); TrkSdxyWrong.clear(); TrkKdzWrong.clear();TrkpidzWrong.clear();TrkSdzWrong.clear(); TrkKnhitsWrong.clear(); TrkpinhitsWrong.clear(); TrkSnhitsWrong.clear(); TrkKchi2Wrong.clear(); Trkpichi2Wrong.clear(); TrkSchi2Wrong.clear(); DSDeltaRWrong.clear(); TrkKptWrong.clear(); TrkpiptWrong.clear(); TrkSptWrong.clear(); TrkKetaWrong.clear(); TrkpietaWrong.clear(); TrkSetaWrong.clear(); TrkKphiWrong.clear();TrkpiphiWrong.clear(); TrkSphiWrong.clear();TrkSchargeWrong.clear(); D0fromDSsXY_vecWrong.clear(); D0fromDSs3D_vecWrong.clear(); Anglephi_vecWrong.clear();
 
-	D0Kpi_VtxProb.clear();D0Kpimass.clear();D0Kpipt.clear();D0Kpieta.clear(); D0Kpiphi.clear(); D0Kpi_VtxPosx.clear(); D0Kpi_VtxPosy.clear(); D0Kpi_VtxPosz.clear();D0Kpi_Vtxerrx.clear(); D0Kpi_Vtxerry.clear(); D0Kpi_Vtxerrz.clear(); D0Kpi_DispAngle.clear(); TrkD0pidxy.clear();TrkD0Kdz.clear(); TrkD0pidz.clear(); TrkD0Knhits.clear(); TrkD0pinhits.clear(); TrkD0Kchi2.clear();TrkD0pichi2.clear(); TrkD0Kpt.clear(); TrkD0pipt.clear(); TrkD0Keta.clear(); TrkD0pieta.clear(); TrkD0Kphi.clear(); TrkD0piphi.clear(); D0KpisXY_vec.clear(); D0KpidXY_vec.clear(); D0KpieXY_vec.clear(); D0Kpis3D_vec.clear(); D0Kpid3D_vec.clear(); D0Kpie3D_vec.clear(); D0_kT_vec.clear();	
+	D0Kpi_VtxProb.clear();D0Kpimass.clear();D0Kpipt.clear();D0Kpieta.clear(); D0Kpiphi.clear(); D0Kpi_VtxPosx.clear(); D0Kpi_VtxPosy.clear(); D0Kpi_VtxPosz.clear();D0Kpi_Vtxerrx.clear(); D0Kpi_Vtxerry.clear(); D0Kpi_Vtxerrz.clear(); D0Kpi_DispAngle.clear(); TrkD0pidxy.clear(); TrkD0Kdxy.clear(); TrkD0Kdz.clear(); TrkD0pidz.clear(); TrkD0Knhits.clear(); TrkD0pinhits.clear(); TrkD0Kchi2.clear();TrkD0pichi2.clear(); TrkD0Kpt.clear(); TrkD0pipt.clear(); TrkD0Keta.clear(); TrkD0pieta.clear(); TrkD0Kphi.clear(); TrkD0piphi.clear(); D0KpisXY_vec.clear(); D0KpidXY_vec.clear(); D0KpieXY_vec.clear(); D0Kpis3D_vec.clear(); D0Kpid3D_vec.clear(); D0Kpie3D_vec.clear(); D0_kT_vec.clear();	
 	//	D0KpisXY_.clear();
 	//----------------------------
 	//D* MC
@@ -1502,13 +1479,13 @@ void DstarD0TTree::endJob(){
 
 //***********************************************************************************
 void DstarD0TTree::beginJob(){
-	//Weighting PileUp 
-	const edm::InputTag& PileupSumInfoInputTags = edm::InputTag( "slimmedAddPileupInfo" ) ;
-	LumiWeights_ = new edm::LumiReWeighting("PileupMC.root", "MyDataPileupHistogram.root", "input_Event/N_TrueInteractions", "pileup", PileupSumInfoInputTags);
-
+		
 	//CREATING BRANCHES
 	if(doMC)
 	{
+	//Weighting PileUp 
+	const edm::InputTag& PileupSumInfoInputTags = edm::InputTag( "slimmedAddPileupInfo" ) ;
+	LumiWeights_ = new edm::LumiReWeighting("PileupMC.root", "MyDataPileupHistogram.root", "input_Event/N_TrueInteractions", "pileup", PileupSumInfoInputTags);
 	data->Branch("PUWeight",&PUWeight,"PUWeight/D");
 	data->Branch("nPU",&nPU,"nPU/D");
 	data->Branch("GenWeight",&GenWeight,"GenWeight/D");
@@ -1849,7 +1826,7 @@ void DstarD0TTree::beginJob(){
 	data->Branch("MCDstarB_Pip",&MCDstarB_Pip);
 	data->Branch("MCDstarB_Piet",&MCDstarB_Piet);
 	data->Branch("MCDstarB_Pirapidity",&MCDstarB_Pirapidity);
-	data->Branch("MCDstarB_Pimass",&MCDstarB_Pimass);																
+	data->Branch("MCDstarB_Pimass",&MCDstarB_Pimass);															
 	//======================================================
 	// MC Variables - D0 
 	//======================================================

@@ -180,7 +180,7 @@ class DstarD0TTree : public edm::EDAnalyzer {
 	
 		double Ebeam_, comEnergy_, DstarSignificance3D_ , D0Significance3D_;
 
-		int Total_Events, Triggered_Event, runNumber,eventNumber,lumi, Total_Events_test, B0test, Triggered_Event_test, TriggeredReference_Event_test, ND0KpiCand, NKpiCand, FlagMC, FlagRec, n_pVertex, ntracksD0Kpi, ntracksDstar, TriggeredReference_Event_test2;  
+		int Total_Events, Triggered_Event, runNumber,eventNumber,lumi, Total_Events_test, B0test, Triggered_Event_test, TriggeredReference_Event_test, NKpiCand, FlagMC, FlagRec, n_pVertex, ntracksD0Kpi, ntracksDstar, TriggeredReference_Event_test2;  
 
 		double PVx, PVy, PVz, PVerrx, PVerry, PVerrz, lumiWeight_, mass1, mass2;
 
