@@ -22,8 +22,8 @@ SkipEvent = cms.untracked.vstring('Error: uninitialized ProxyBase used') )
 #USE THIS BLOCK FOR CONVENTIONAL FILE OPENING!===========
 process.source = cms.Source("PoolSource", 
     fileNames = cms.untracked.vstring(
-'file:FE4C1BFF-3224-134B-94EB-49E603290280_OfficialMC.root'
-#'file:F79E9F51-558B-3445-B2B6-7160DF5FE99E_MinBiasMC.root'	
+#'file:FE4C1BFF-3224-134B-94EB-49E603290280_OfficialMC.root'
+'file:F79E9F51-558B-3445-B2B6-7160DF5FE99E_MinBiasMC.root'	
 	   )
 )
 #===================================================================
@@ -44,7 +44,6 @@ process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
 process.analysis = cms.EDAnalyzer('DstarD0TTree',
 	# Analysis
 	doMC = cms.bool(True),  #True to run on MC
-	doRec = cms.bool(True),
 	bits = cms.InputTag("TriggerResults","","HLT"),
 	prescales = cms.InputTag("patTrigger"),#linked to pat::PackedTriggerPrescales
 	objects = cms.InputTag("selectedPatTrigger"),
