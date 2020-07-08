@@ -970,7 +970,7 @@ TH2* makeTH2GenRec( TString name, TString nameAxis, Double_t BIN, Double_t NMIN 
 
 	if( TEfficiency::CheckConsistency(*h1,*h2) )
 	{	TCanvas* canvas = new TCanvas("canvas","",1200,600);
-		TGraphAsymmErrors *gr = new TGraphAsymmErrors( *(h1), *(h2));
+		TGraphAsymmErrors *gr = new TGraphAsymmErrors( h1, h2);
 		gr->SetTitle(hTITLE);
 		gr->SetMarkerColor(4);
 		gr->SetMarkerStyle(21);
